@@ -1,4 +1,4 @@
-package com.langtools.tokenization;
+package com.statelang.tokenization;
 
 public class Token {
 	private final SourceText sourceText;

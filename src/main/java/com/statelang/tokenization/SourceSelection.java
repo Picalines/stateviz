@@ -1,4 +1,4 @@
-package com.langtools.tokenization;
+package com.statelang.tokenization;
 
 public record SourceSelection(SourceLocation start, SourceLocation end) {
 	public static final SourceSelection FIRST_CHARACTER = new SourceSelection(SourceLocation.FIRST_CHARACTER,

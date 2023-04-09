@@ -1,4 +1,4 @@
-package com.langtools.tokenization;
+package com.statelang.tokenization;
 
 public record SourceLocation(int line, int column) implements Comparable<SourceLocation> {
 
