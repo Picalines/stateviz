@@ -54,18 +54,18 @@ public record SourceLocation(int line, int column) implements Comparable<SourceL
 	}
 
 	public boolean isBefore(SourceLocation other) {
-		return line == other.line ? column < other.column : line < other.line;
+		return compareTo(other) < 0;
 	}
 
 	public boolean isBeforeOrAt(SourceLocation other) {
-		return line == other.line ? column <= other.column : line < other.line;
+		return compareTo(other) <= 0;
 	}
 
 	public boolean isAfter(SourceLocation other) {
-		return line == other.line ? column > other.column : line > other.line;
+		return compareTo(other) > 0;
 	}
 
 	public boolean isAfterOrAt(SourceLocation other) {
-		return line == other.line ? column >= other.column : line > other.line;
+		return compareTo(other) >= 0;
 	}
 }
