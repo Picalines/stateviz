@@ -30,5 +30,8 @@ tasks.named('test') {
 spotless {
     java {
         eclipse()
+
+        endWithNewline()
+        trimTrailingWhitespace()
     }
 }
