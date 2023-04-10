@@ -24,7 +24,7 @@ public class Token {
 	}
 
 	public String text() {
-		return sourceText.getText().substring(sourceIndex, sourceIndex + length);
+		return sourceText.text().substring(sourceIndex, sourceIndex + length);
 	}
 
 	public SourceSelection selection() {
@@ -37,6 +37,6 @@ public class Token {
 
 	@Override
 	public String toString() {
-		return "Token(" + kind + ", " + sourceText.getSourceDescriptor() + ", {" + selection + "})";
+		return "Token(" + kind + ", " + sourceText.sourceDescriptor() + ", {" + selection + "})";
 	}
 }

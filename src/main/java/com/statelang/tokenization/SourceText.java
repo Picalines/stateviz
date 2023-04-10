@@ -23,11 +23,11 @@ public final class SourceText {
 		return new SourceText(filePath.getFileName().toString(), text);
 	}
 
-	public String getSourceDescriptor() {
+	public String sourceDescriptor() {
 		return sourceDescriptor;
 	}
 
-	public String getText() {
+	public String text() {
 		return text;
 	}
 }
