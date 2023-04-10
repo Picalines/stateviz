@@ -7,11 +7,11 @@ public class Token {
 
 	private final int length;
 
-	private final Enum<?> kind;
+	private final TokenKind kind;
 
 	private final int sourceIndex;
 
-	Token(SourceText sourceText, SourceLocation startLocation, int sourceIndex, int length, Enum<?> kind) {
+	Token(SourceText sourceText, SourceLocation startLocation, int sourceIndex, int length, TokenKind kind) {
 		this.sourceText = sourceText;
 		this.sourceIndex = sourceIndex;
 		this.length = length;
@@ -31,7 +31,7 @@ public class Token {
 		return selection;
 	}
 
-	public Enum<?> kind() {
+	public TokenKind kind() {
 		return kind;
 	}
 
