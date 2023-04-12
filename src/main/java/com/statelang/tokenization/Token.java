@@ -1,6 +1,6 @@
 package com.statelang.tokenization;
 
-public class Token {
+public final class Token {
 	private final SourceText sourceText;
 
 	private final SourceSelection selection;
@@ -37,6 +37,8 @@ public class Token {
 
 	@Override
 	public String toString() {
-		return "Token(" + kind + ", " + sourceText.sourceDescriptor() + ", {" + selection + "})";
+		final var oneLineValue = text().replace("\n", "\\n");
+		final var sourceDesc = sourceText.sourceDescriptor();
+		return "Token(" + kind + " '" + oneLineValue + "' in " + sourceDesc + " at {" + selection + "})";
 	}
 }
