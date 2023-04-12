@@ -19,7 +19,7 @@ public final class SourceText {
 	}
 
 	public static SourceText fromFile(Path filePath) throws IOException {
-		var text = Files.readString(filePath);
+		final var text = Files.readString(filePath);
 		return new SourceText(filePath.getFileName().toString(), text);
 	}
 
