@@ -7,7 +7,7 @@ public enum TokenKind {
     COMMENT("comment", "#.*\\n?"),
 
     SEMICOLON("';'", ";"),
-    COLOON("':'", ":"),
+    COLON("':'", ":"),
     COMMA("','", ","),
     DOT("'.'", "\\."),
     AT("'@'", "@"),
