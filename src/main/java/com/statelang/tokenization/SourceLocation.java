@@ -48,6 +48,10 @@ public record SourceLocation(int line, int column) implements Comparable<SourceL
 		return new SourceLocation(line, column);
 	}
 
+	public SourceSelection toCharSelection() {
+		return new SourceSelection(this, this);
+	}
+
 	@Override
 	public int compareTo(SourceLocation other) {
 		return line == other.line ? column - other.column : line - other.line;
