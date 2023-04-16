@@ -15,7 +15,7 @@ public final class Tokenizer implements Iterator<Token> {
 
 	private SourceLocation location = SourceLocation.FIRST_CHARACTER;
 
-	private Tokenizer(SourceText sourceText, Reporter reporter) {
+	Tokenizer(SourceText sourceText, Reporter reporter) {
 		this.sourceText = sourceText;
 		this.reporter = reporter;
 	}
@@ -52,6 +52,6 @@ public final class Tokenizer implements Iterator<Token> {
 		location = location.movedTrough(Character.toString(sourceText.text().charAt(index)));
 		index++;
 
-		return null;
+		return null; // TODO bad token handling
 	}
 }
