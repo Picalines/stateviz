@@ -71,6 +71,10 @@ class LinkedNodeList<T> {
 
         node.removed = true;
 
+        if (node == first) {
+            first = node.next;
+        }
+
         if (node.previous != null) {
             node.previous.next = node.next;
         }

@@ -30,14 +30,14 @@ public final class TokenReader {
 
     public Token currentToken() {
         return currentToken != null
-            ? currentToken.value
-            : null;
+                ? currentToken.value
+                : null;
     }
 
     public SourceSelection selection() {
         return currentToken != null
-            ? currentToken.value.selection()
-            : SourceSelection.FIRST_CHARACTER;
+                ? currentToken.value.selection()
+                : SourceSelection.FIRST_CHARACTER;
     }
 
     public SourceLocation location() {
@@ -56,11 +56,9 @@ public final class TokenReader {
 
         if (tokenizer.hasNext()) {
             var nextToken = tokenizer.next();
-            if (nextToken != null) {
-                currentToken = cachedTokens.addLast(nextToken);
-                clearUnreachableTokens();
-                return true;
-            }
+            currentToken = cachedTokens.addLast(nextToken);
+            clearUnreachableTokens();
+            return true;
         }
 
         atEnd = true;
@@ -83,22 +81,12 @@ public final class TokenReader {
     private void clearUnreachableTokens() {
         var tokenNode = cachedTokens.first();
         var firstMarkedToken = Optional.ofNullable(bookmarks.first())
-            .map(mark -> mark.value.tokenNode())
-            .orElse(null);
+                .map(mark -> mark.value.tokenNode())
+                .orElse(null);
 
         while (tokenNode != null && tokenNode != currentToken && tokenNode != firstMarkedToken) {
             tokenNode = tokenNode.next();
             cachedTokens.removeFirst();
-        }
-    }
-
-    public static void main(String[] args) {
-        var sourceText = SourceText.fromString("input", "1 2 3");
-        var reporter = new Reporter();
-        var reader = startReading(sourceText, reporter);
-
-        while (reader.tryAdvance()) {
-            System.out.println(reader.currentToken());
         }
     }
 }
