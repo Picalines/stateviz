@@ -20,11 +20,11 @@ public record SourceLocation(int line, int column) implements Comparable<SourceL
 		return "Line " + line + ", Column " + column;
 	}
 
-	public SourceLocation movedTrough(String textSpan) {
+	public SourceLocation movedTrough(String text) {
 		int linesCount = 0, lastLineLength = 0;
 
-		for (int i = 0; i < textSpan.length(); i++) {
-			char ch = textSpan.charAt(i);
+		for (int i = 0; i < text.length(); i++) {
+			char ch = text.charAt(i);
 			if (ch == '\n') {
 				linesCount++;
 				lastLineLength = 0;

@@ -1,6 +1,7 @@
 package com.statelang.tokenization;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -77,5 +78,19 @@ public class SourceLocationTests {
 			assertTrue(new SourceLocation(1, 5).isAfterOrAt(new SourceLocation(1, 1)));
 			assertTrue(new SourceLocation(1, 1).isAfterOrAt(new SourceLocation(1, 1)));
 		}
+	}
+
+	@Test
+	void movedTrough() {
+		var location = new SourceLocation(1, 1);
+
+		assertEquals(location.movedTrough("x"), new SourceLocation(1, 2));
+		assertEquals(location.movedTrough("txt"), new SourceLocation(1, 4));
+
+		assertEquals(location.movedTrough("line\n"), new SourceLocation(2, 1));
+		assertEquals(location.movedTrough("\n"), new SourceLocation(2, 1));
+		
+		assertEquals(location.movedTrough("\n\n"), new SourceLocation(3, 1));
+		assertEquals(location.movedTrough("line\n\ntxt"), new SourceLocation(3, 4));
 	}
 }
