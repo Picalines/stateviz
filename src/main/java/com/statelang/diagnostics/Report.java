@@ -3,6 +3,7 @@ package com.statelang.diagnostics;
 import com.statelang.tokenization.SourceSelection;
 
 public final class Report {
+
 	public static enum Severity {
 		INFO, WARNING, ERROR,
 	}

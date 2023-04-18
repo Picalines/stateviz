@@ -33,7 +33,7 @@ public enum TokenKind {
 	OPERATOR_GREATER_OR_EQUAL("'>='", ">="),
 	OPERATOR_GREATER("'>'", ">"),
 	OPERATOR_PLUS("'+'", "\\+"),
-	OPERATOR_MINUS("'-'","\\-"),
+	OPERATOR_MINUS("'-'", "\\-"),
 	OPERATOR_MULTIPLY("'*'", "\\*"),
 	OPERATOR_DIVIDE("'/'", "\\/"),
 	OPERATOR_MODULO("'%'", "\\%"),

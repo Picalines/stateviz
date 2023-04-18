@@ -7,6 +7,7 @@ import java.util.List;
 import com.statelang.tokenization.SourceSelection;
 
 public final class Reporter {
+
 	private final List<Report> reports = new ArrayList<>();
 
 	public List<Report> reports() {

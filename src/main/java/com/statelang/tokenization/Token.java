@@ -1,6 +1,7 @@
 package com.statelang.tokenization;
 
 public final class Token {
+
 	private final SourceText sourceText;
 
 	private final SourceSelection selection;

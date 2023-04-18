@@ -1,8 +1,10 @@
 package com.statelang.tokenization;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 class LinkedNodeList<T> {
+
     public final class Node {
         public final T value;
 
@@ -37,6 +39,10 @@ class LinkedNodeList<T> {
         return first;
     }
 
+    public Node last() {
+        return last;
+    }
+
     public Node addLast(T value) {
         if (first == null) {
             return first = last = new Node(value);
@@ -48,6 +54,8 @@ class LinkedNodeList<T> {
     }
 
     public Node addBefore(Node node, T value) {
+        Objects.requireNonNull(node, "node must not be null");
+
         if (node.removed || node.list() != this) {
             throw new NoSuchElementException();
         }
@@ -65,6 +73,8 @@ class LinkedNodeList<T> {
     }
 
     public void remove(Node node) {
+        Objects.requireNonNull(node, "node must not be null");
+
         if (node.removed) {
             throw new NoSuchElementException();
         }

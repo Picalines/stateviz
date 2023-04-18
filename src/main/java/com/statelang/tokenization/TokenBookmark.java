@@ -14,11 +14,10 @@ public final class TokenBookmark implements AutoCloseable {
     private boolean discarded = false;
 
     TokenBookmark(
-        TokenReader reader,
-        SourceLocation location,
-        LinkedNodeList<Token>.Node tokenNode,
-        LinkedNodeList<TokenBookmark> bookmarkList
-    ) {
+            TokenReader reader,
+            SourceLocation location,
+            LinkedNodeList<Token>.Node tokenNode,
+            LinkedNodeList<TokenBookmark> bookmarkList) {
         this.reader = reader;
         this.location = location;
         this.tokenNode = tokenNode;
@@ -28,14 +27,13 @@ public final class TokenBookmark implements AutoCloseable {
         var nextBookmark = bookmarkList.first();
         var bookmarkLocation = reader.location();
 
-        while (nextBookmark != null && nextBookmark.value.location.isBefore(bookmarkLocation))
-        {
+        while (nextBookmark != null && nextBookmark.value.location.isBefore(bookmarkLocation)) {
             nextBookmark = nextBookmark.next();
         }
 
         this.bookmarkNode = nextBookmark != null
-            ? bookmarkList.addBefore(nextBookmark, this)
-            : bookmarkList.addLast(this);
+                ? bookmarkList.addBefore(nextBookmark, this)
+                : bookmarkList.addLast(this);
     }
 
     TokenReader reader() {

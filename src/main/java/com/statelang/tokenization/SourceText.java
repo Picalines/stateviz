@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class SourceText {
+
 	private final String sourceDescriptor;
 
 	private final String text;
