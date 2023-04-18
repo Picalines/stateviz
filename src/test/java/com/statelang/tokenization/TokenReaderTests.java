@@ -1,0 +1,130 @@
+package com.statelang.tokenization;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+
+import com.statelang.diagnostics.Report;
+import com.statelang.diagnostics.Reporter;
+
+public class TokenReaderTests {
+
+    private TokenReader createReader(String text, Reporter reporter) {
+        return TokenReader.startReading(SourceText.fromString("test", text), reporter);
+    }
+
+    @Test
+    void emptySource() {
+        var reporter = new Reporter();
+        var reader = createReader("", reporter);
+
+        assertTrue(reader.atEnd());
+        assertFalse(reader.tryAdvance());
+
+        assertFalse(reporter.hasErrors());
+    }
+
+    @Test
+    void singleToken() {
+        var reporter = new Reporter();
+        var reader = createReader("token", reporter);
+
+        assertFalse(reader.atEnd());
+
+        var token = reader.currentToken();
+        assertNotNull(token);
+        assertEquals(token.kind(), TokenKind.IDENTIFIER);
+        assertEquals(token.selection(), new SourceSelection(new SourceLocation(1, 1), new SourceLocation(1, 5)));
+
+        assertFalse(reader.tryAdvance());
+        assertTrue(reader.atEnd());
+        assertEquals(reader.currentToken(), token);
+
+        assertFalse(reporter.hasErrors());
+    }
+
+    @Test
+    void ignoredTokens() {
+        var reporter = new Reporter();
+        var reader = createReader("# comment\n token] ", reporter);
+
+        assertFalse(reader.atEnd());
+
+        var token = reader.currentToken();
+        assertNotNull(token);
+        assertEquals(token.kind(), TokenKind.IDENTIFIER);
+        assertEquals(token.selection(), new SourceSelection(new SourceLocation(2, 2), new SourceLocation(2, 6)));
+
+        assertFalse(reader.tryAdvance());
+        assertTrue(reader.atEnd());
+        assertEquals(reader.currentToken(), token);
+
+        assertTrue(reporter.hasErrors());
+        assertEquals(reporter.reports().size(), 1);
+
+        var invalidCharReport = reporter.reports().get(0);
+        assertEquals(invalidCharReport.severity(), Report.Severity.ERROR);
+
+        var invalidChatLocation = new SourceLocation(2, 7);
+        assertEquals(invalidCharReport.selection(), invalidChatLocation.toCharSelection());
+    }
+
+    @Test
+    void threeNumbers() {
+        var reporter = new Reporter();
+        var reader = createReader("0 1 2", reporter);
+
+        for (int num = 0; num < 3; num++) {
+            assertFalse(reader.atEnd());
+
+            var currentToken = reader.currentToken();
+            assertNotNull(currentToken);
+
+            assertEquals(currentToken.kind(), TokenKind.LITERAL_NUMBER);
+            assertEquals(currentToken.text(), Integer.toString(num));
+
+            reader.tryAdvance();
+        }
+
+        assertTrue(reader.atEnd());
+        assertFalse(reader.tryAdvance());
+
+        assertFalse(reporter.hasErrors());
+    }
+
+    @Test
+    void threeNumbersBacktracked() {
+        var reporter = new Reporter();
+        var reader = createReader("0 1 2", reporter);
+
+        var firstBookmark = reader.createBookmark();
+
+        for (int i = 0; i < 2; i++) {
+            for (int num = 0; num < 3; num++) {
+                assertFalse(reader.atEnd());
+
+                var currentToken = reader.currentToken();
+                assertNotNull(currentToken);
+
+                assertEquals(currentToken.kind(), TokenKind.LITERAL_NUMBER);
+                assertEquals(currentToken.text(), Integer.toString(num));
+
+                reader.tryAdvance();
+            }
+
+            assertTrue(reader.atEnd());
+            assertFalse(reader.tryAdvance());
+
+            assertFalse(reporter.hasErrors());
+
+            if (i == 0) {
+                reader.backtrackTo(firstBookmark);
+                firstBookmark.close();
+            }
+        }
+    }
+
+}

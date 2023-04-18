@@ -55,7 +55,7 @@ class LinkedNodeList<T> {
     }
 
     public Node addBefore(Node node, T value) {
-        Preconditions.checkNotNull(node, "node must not be null");
+        Preconditions.checkNotNull(node, "node is null");
 
         if (node.removed || node.list() != this) {
             throw new NoSuchElementException();
@@ -74,7 +74,7 @@ class LinkedNodeList<T> {
     }
 
     public void remove(Node node) {
-        Preconditions.checkNotNull(node, "node must not be null");
+        Preconditions.checkNotNull(node, "node is null");
 
         if (node.removed) {
             throw new NoSuchElementException();

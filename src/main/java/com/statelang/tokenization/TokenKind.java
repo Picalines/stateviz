@@ -3,8 +3,8 @@ package com.statelang.tokenization;
 import java.util.regex.Pattern;
 
 public enum TokenKind {
-	WHITESPACE("whitespace", "\\s+"),
-	COMMENT("comment", "#.*\\n?"),
+	WHITESPACE("whitespace", "\\s+", true),
+	COMMENT("comment", "#.*\\n?", true),
 
 	SEMICOLON("';'", ";"),
 	COLON("':'", ":"),
@@ -47,17 +47,28 @@ public enum TokenKind {
 
 	IDENTIFIER("identifier", "\\b[a-zA-Z][a-zA-Z0-9]*\\b");
 
+	private final boolean ignored;
+
 	private final String description;
 
 	private final Pattern regex;
 
-	private TokenKind(String description, String regex) {
+	private TokenKind(String description, String regex, boolean ignored) {
+		this.ignored = ignored;
 		this.description = description;
 		this.regex = Pattern.compile(regex);
 	}
 
+	private TokenKind(String description, String regex) {
+		this(description, regex, false);
+	}
+
 	public int priority() {
 		return ordinal();
+	}
+
+	public boolean ignored() {
+		return ignored;
 	}
 
 	public String description() {

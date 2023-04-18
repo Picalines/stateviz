@@ -1,12 +1,14 @@
 package com.statelang.tokenization;
 
+import java.util.Iterator;
 import java.util.Optional;
 
+import com.google.common.collect.Iterators;
 import com.statelang.diagnostics.Reporter;
 
 public final class TokenReader {
 
-    private final Tokenizer tokenizer;
+    private final Iterator<Token> tokenizer;
 
     private LinkedNodeList<Token> cachedTokens = new LinkedNodeList<>();
 
@@ -17,7 +19,7 @@ public final class TokenReader {
     private boolean atEnd = false;
 
     private TokenReader(Tokenizer tokenizer) {
-        this.tokenizer = tokenizer;
+        this.tokenizer = Iterators.filter(tokenizer, token -> token != null && !token.kind().ignored());
 
         tryAdvance();
     }

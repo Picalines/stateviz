@@ -7,6 +7,8 @@ public record SourceSelection(SourceLocation start, SourceLocation end) {
 	public static final SourceSelection FIRST_CHARACTER = SourceLocation.FIRST_CHARACTER.toCharSelection();
 
 	public SourceSelection {
+		Preconditions.checkNotNull(start, "start is null");
+		Preconditions.checkNotNull(end, "end is null");
 		Preconditions.checkArgument(start.isBeforeOrAt(end), "start is after end");
 	}
 

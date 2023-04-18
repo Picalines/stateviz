@@ -15,6 +15,8 @@ public class SourceSelectionTests {
 
     @Test
     void constructorArguments() {
+        assertThrows(NullPointerException.class, () -> new SourceSelection(null, SourceLocation.FIRST_CHARACTER));
+        assertThrows(NullPointerException.class, () -> new SourceSelection(SourceLocation.FIRST_CHARACTER, null));
         assertThrows(IllegalArgumentException.class, () -> createSelection(1, 5, 1, 1));
         assertThrows(IllegalArgumentException.class, () -> createSelection(5, 1, 1, 1));
 
