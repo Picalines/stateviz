@@ -18,6 +18,8 @@ public final class TokenReader {
 
     private TokenReader(Tokenizer tokenizer) {
         this.tokenizer = tokenizer;
+
+        tryAdvance();
     }
 
     public static TokenReader startReading(SourceText sourceText, Reporter reporter) {
@@ -65,9 +67,12 @@ public final class TokenReader {
         return false;
     }
 
-    public void createBookmark() {
-        @SuppressWarnings("all")
-        var bookmark = new TokenBookmark(this, location(), currentToken, bookmarks);
+    public TokenBookmark createBookmark() {
+        if (currentToken == null) {
+            throw new IllegalStateException("cannot create bookmark at end");
+        }
+
+        return new TokenBookmark(this, location(), currentToken, bookmarks);
     }
 
     public void backtrackTo(TokenBookmark bookmark) {
@@ -76,6 +81,7 @@ public final class TokenReader {
         }
 
         currentToken = bookmark.tokenNode();
+        atEnd = false;
     }
 
     private void clearUnreachableTokens() {
