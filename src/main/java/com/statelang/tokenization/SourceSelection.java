@@ -1,14 +1,13 @@
 package com.statelang.tokenization;
 
+import com.google.common.base.Preconditions;
+
 public record SourceSelection(SourceLocation start, SourceLocation end) {
 
-	public static final SourceSelection FIRST_CHARACTER = new SourceSelection(SourceLocation.FIRST_CHARACTER,
-			SourceLocation.FIRST_CHARACTER);
+	public static final SourceSelection FIRST_CHARACTER = SourceLocation.FIRST_CHARACTER.toCharSelection();
 
 	public SourceSelection {
-		if (end.isBefore(start)) {
-			throw new IllegalArgumentException("SourceSelection end is before start");
-		}
+		Preconditions.checkArgument(start.isBeforeOrAt(end), "start is after end");
 	}
 
 	public boolean contains(SourceLocation location) {

@@ -1,7 +1,8 @@
 package com.statelang.tokenization;
 
 import java.util.NoSuchElementException;
-import java.util.Objects;
+
+import com.google.common.base.Preconditions;
 
 class LinkedNodeList<T> {
 
@@ -54,7 +55,7 @@ class LinkedNodeList<T> {
     }
 
     public Node addBefore(Node node, T value) {
-        Objects.requireNonNull(node, "node must not be null");
+        Preconditions.checkNotNull(node, "node must not be null");
 
         if (node.removed || node.list() != this) {
             throw new NoSuchElementException();
@@ -73,7 +74,7 @@ class LinkedNodeList<T> {
     }
 
     public void remove(Node node) {
-        Objects.requireNonNull(node, "node must not be null");
+        Preconditions.checkNotNull(node, "node must not be null");
 
         if (node.removed) {
             throw new NoSuchElementException();

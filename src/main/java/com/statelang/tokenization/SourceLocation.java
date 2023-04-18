@@ -1,17 +1,14 @@
 package com.statelang.tokenization;
 
+import com.google.common.base.Preconditions;
+
 public record SourceLocation(int line, int column) implements Comparable<SourceLocation> {
 
 	public static final SourceLocation FIRST_CHARACTER = new SourceLocation(1, 1);
 
 	public SourceLocation {
-		if (line <= 0) {
-			throw new IllegalArgumentException("line");
-		}
-
-		if (column <= 0) {
-			throw new IllegalArgumentException("column");
-		}
+		Preconditions.checkArgument(line > 0, "line out of bounds");
+		Preconditions.checkArgument(column > 0, "column out of bounds");
 	}
 
 	public SourceLocation() {
