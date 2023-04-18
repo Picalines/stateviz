@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class SourceSelectionTests {
+class SourceSelectionTests {
 
     private SourceSelection createSelection(int startLine, int startColumn, int endLine, int endColumn) {
         return new SourceSelection(new SourceLocation(startLine, startColumn), new SourceLocation(endLine, endColumn));

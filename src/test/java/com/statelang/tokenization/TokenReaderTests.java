@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.statelang.diagnostics.Report;
 import com.statelang.diagnostics.Reporter;
 
-public class TokenReaderTests {
+class TokenReaderTests {
 
     private TokenReader createReader(String text, Reporter reporter) {
         return TokenReader.startReading(SourceText.fromString("test", text), reporter);
