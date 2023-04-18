@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 
 import com.statelang.diagnostics.Reporter;
 
-public final class Tokenizer implements Iterator<Token> {
+final class Tokenizer implements Iterator<Token> {
 
 	private final SourceText sourceText;
 
