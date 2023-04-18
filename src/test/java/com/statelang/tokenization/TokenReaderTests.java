@@ -2,6 +2,7 @@ package com.statelang.tokenization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -124,6 +125,54 @@ public class TokenReaderTests {
                 reader.backtrackTo(firstBookmark);
                 firstBookmark.close();
             }
+        }
+    }
+
+    @Test
+    void keywordOverIdentifier() {
+        var sourceBuilder = new StringBuilder();
+
+        var addedAnyKeyword = false;
+        for (var kind : TokenKind.values()) {
+            if (!kind.name().startsWith("KEYWORD")) {
+                continue;
+            }
+
+            sourceBuilder.append(kind.regex().pattern().replace("\\b", ""));
+            sourceBuilder.append('\n');
+
+            addedAnyKeyword = true;
+        }
+
+        assertTrue(addedAnyKeyword);
+
+        var sourceText = SourceText.fromString("test", sourceBuilder.toString());
+
+        var reporter = new Reporter();
+        var reader = TokenReader.startReading(sourceText, reporter);
+
+        while (!reader.atEnd()) {
+            var token = reader.currentToken();
+            assertNotNull(token);
+            assertNotEquals(token.kind(), TokenKind.IDENTIFIER);
+
+            reader.tryAdvance();
+        }
+    }
+
+    @Test
+    void booleanLiteralOverIdentifier() {
+        var sourceText = SourceText.fromString("test", "true\nfalse");
+
+        var reporter = new Reporter();
+        var reader = TokenReader.startReading(sourceText, reporter);
+
+        while (!reader.atEnd()) {
+            var token = reader.currentToken();
+            assertNotNull(token);
+            assertNotEquals(token.kind(), TokenKind.IDENTIFIER);
+
+            reader.tryAdvance();
         }
     }
 
