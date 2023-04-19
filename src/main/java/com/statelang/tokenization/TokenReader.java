@@ -3,6 +3,7 @@ package com.statelang.tokenization;
 import java.util.Iterator;
 import java.util.Optional;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterators;
 import com.statelang.diagnostics.Reporter;
 
@@ -70,17 +71,14 @@ public final class TokenReader {
     }
 
     public TokenBookmark createBookmark() {
-        if (currentToken == null) {
-            throw new IllegalStateException("cannot create bookmark at end");
-        }
+        Preconditions.checkState(currentToken != null, "cannot create bookmark at end");
 
         return new TokenBookmark(this, location(), currentToken, bookmarks);
     }
 
     public void backtrackTo(TokenBookmark bookmark) {
-        if (bookmark.reader() != this) {
-            throw new IllegalArgumentException();
-        }
+        Preconditions.checkArgument(bookmark.reader() == this,
+                "provided TokenBookmark was created by another TokenReader");
 
         currentToken = bookmark.tokenNode();
         atEnd = false;

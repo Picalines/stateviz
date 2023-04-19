@@ -27,7 +27,7 @@ final class Tokenizer implements Iterator<Token> {
 
 	@Override
 	public Token next() {
-		if (index >= sourceText.text().length()) {
+		if (!hasNext()) {
 			throw new NoSuchElementException();
 		}
 
@@ -52,6 +52,6 @@ final class Tokenizer implements Iterator<Token> {
 		location = location.movedTrough(Character.toString(sourceText.text().charAt(index)));
 		index++;
 
-		return null; // TODO bad token handling
+		return null;
 	}
 }
