@@ -1,39 +1,62 @@
 package com.statelang.diagnostics;
 
-import com.statelang.tokenization.SourceSelection;
+import java.util.Collections;
+import java.util.List;
 
+import com.statelang.tokenization.SourceSelection;
+import com.statelang.tokenization.TokenKind;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.experimental.Accessors;
+
+@Accessors(fluent = true)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public final class Report {
 
 	public static enum Severity {
-		INFO, WARNING, ERROR,
+		INFO,
+		WARNING,
+		ERROR,
 	}
 
+	public enum Kind {
+		INVALID_TOKEN(Severity.ERROR),
+		UNEXPECTED_TOKEN(Severity.ERROR),
+		UNEXPECTED_END_OF_INPUT(Severity.ERROR),
+		END_OF_INPUT_EXPECTED(Severity.ERROR);
+
+		@Getter
+		private final Severity severity;
+
+		private Kind(Severity severity) {
+			this.severity = severity;
+		}
+	}
+
+	@Getter
 	private final SourceSelection selection;
 
-	private final Severity severity;
+	@Getter
+	private final Kind kind;
 
-	private final String message;
+	@Getter
+	@Builder.Default
+	private final TokenKind unexpectedTokenKind = null;
 
-	Report(SourceSelection selection, Severity severity, String message) {
-		this.selection = selection;
-		this.severity = severity;
-		this.message = message;
-	}
-
-	public SourceSelection selection() {
-		return selection;
-	}
+	@Getter
+	@Builder.Default
+	private final List<TokenKind> expectedTokenKinds = Collections.emptyList();
 
 	public Severity severity() {
-		return severity;
-	}
-
-	public String message() {
-		return message;
+		return kind.severity;
 	}
 
 	@Override
 	public String toString() {
-		return severity + " (" + selection + "): " + message;
+		return severity() + " (" + selection + ") " + kind.name();
 	}
 }

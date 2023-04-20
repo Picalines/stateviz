@@ -1,14 +1,20 @@
 package com.statelang.tokenization;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
+
+@Accessors(fluent = true)
 public final class Token {
+
+	@Getter
+	private final SourceSelection selection;
+
+	@Getter
+	private final TokenKind kind;
 
 	private final SourceText sourceText;
 
-	private final SourceSelection selection;
-
 	private final int length;
-
-	private final TokenKind kind;
 
 	private final int sourceIndex;
 
@@ -26,14 +32,6 @@ public final class Token {
 
 	public String text() {
 		return sourceText.text().substring(sourceIndex, sourceIndex + length);
-	}
-
-	public SourceSelection selection() {
-		return selection;
-	}
-
-	public TokenKind kind() {
-		return kind;
 	}
 
 	@Override

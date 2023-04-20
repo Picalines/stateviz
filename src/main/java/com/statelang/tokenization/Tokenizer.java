@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import com.statelang.diagnostics.Reporter;
+import com.statelang.diagnostics.Report;
 
 final class Tokenizer implements Iterator<Token> {
 
@@ -48,7 +49,10 @@ final class Tokenizer implements Iterator<Token> {
 			return token;
 		}
 
-		reporter.reportUnexpectedCharacter(location.toCharSelection());
+		reporter.report(Report.builder()
+				.selection(location.toCharSelection())
+				.kind(Report.Kind.INVALID_TOKEN));
+
 		location = location.movedTrough(Character.toString(sourceText.text().charAt(index)));
 		index++;
 
