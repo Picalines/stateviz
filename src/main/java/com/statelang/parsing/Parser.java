@@ -1,6 +1,7 @@
 package com.statelang.parsing;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.statelang.diagnostics.Report;
 import com.statelang.diagnostics.Reporter;
@@ -32,5 +33,13 @@ public abstract class Parser<T> {
         }
 
         return Optional.of(result.value());
+    }
+
+    public final <U> Parser<U> then(Parser<U> nextParser) {
+        return new ThenParser<>(this, nextParser);
+    }
+
+    public final <U> Parser<U> then(Function<ParserState<T>, Parser<U>> nextParserCreator) {
+        return new ThenParserWithState<>(this, nextParserCreator);
     }
 }

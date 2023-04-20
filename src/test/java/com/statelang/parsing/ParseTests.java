@@ -1,8 +1,10 @@
 package com.statelang.parsing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.statelang.diagnostics.Reporter;
@@ -11,48 +13,89 @@ import com.statelang.tokenization.TokenKind;
 
 class ParseTests {
 
-    @Test
-    void emptySource() {
-        var tokenParser = Parse.token(TokenKind.KEYWORD_STATE);
+    @Nested
+    class TryParseTests {
 
-        var sourceText = SourceText.fromString("test", "");
-        var reporter = new Reporter();
+        @Test
+        void emptySource() {
+            var tokenParser = Parse.token(TokenKind.KEYWORD_STATE);
 
-        var result = tokenParser.tryParse(sourceText, reporter);
+            var sourceText = SourceText.fromString("test", "");
+            var reporter = new Reporter();
 
-        assertTrue(result.isEmpty());
-        assertTrue(reporter.hasErrors());
+            var result = tokenParser.tryParse(sourceText, reporter);
+
+            assertTrue(result.isEmpty());
+            assertTrue(reporter.hasErrors());
+        }
+
+        @Test
+        void singleToken() {
+            var tokenParser = Parse.token(TokenKind.KEYWORD_STATE);
+
+            var sourceText = SourceText.fromString("test", "state");
+            var reporter = new Reporter();
+
+            var result = tokenParser.tryParse(sourceText, reporter);
+
+            assertTrue(result.isPresent());
+            assertEquals(reporter.reports().size(), 0);
+
+            var parsedToken = result.get();
+            assertEquals(parsedToken.kind(), TokenKind.KEYWORD_STATE);
+        }
+
+        @Test
+        void tooManyTokens() {
+            var tokenParser = Parse.token(TokenKind.KEYWORD_STATE);
+
+            var sourceText = SourceText.fromString("test", "state 123");
+            var reporter = new Reporter();
+
+            var result = tokenParser.tryParse(sourceText, reporter);
+
+            assertTrue(result.isPresent());
+            assertTrue(reporter.hasErrors());
+
+            var parsedToken = result.get();
+            assertEquals(parsedToken.kind(), TokenKind.KEYWORD_STATE);
+        }
     }
 
-    @Test
-    void singleToken() {
-        var tokenParser = Parse.token(TokenKind.KEYWORD_STATE);
+    @Nested
+    class CombinatorTests {
 
-        var sourceText = SourceText.fromString("test", "state");
-        var reporter = new Reporter();
+        @Test
+        void then() {
+            var parser = Parse.token(TokenKind.KEYWORD_LET)
+                    .then(Parse.token(TokenKind.IDENTIFIER))
+                    .then(Parse.token(TokenKind.OPERATOR_EQUALS))
+                    .then(Parse.token(TokenKind.LITERAL_NUMBER));
 
-        var result = tokenParser.tryParse(sourceText, reporter);
+            var sourceText = SourceText.fromString("test", "let x = 123");
+            var reporter = new Reporter();
 
-        assertTrue(result.isPresent());
-        assertEquals(reporter.reports().size(), 0);
+            var result = parser.tryParse(sourceText, reporter);
 
-        var parsedToken = result.get();
-        assertEquals(parsedToken.kind(), TokenKind.KEYWORD_STATE);
-    }
+            assertTrue(result.isPresent());
+            assertFalse(reporter.hasErrors());
+        }
 
-    @Test
-    void tooManyTokens() {
-        var tokenParser = Parse.token(TokenKind.KEYWORD_STATE);
+        @Test
+        void thenWithState() {
+            var parser = Parse.token(TokenKind.KEYWORD_LET)
+                    .then(firstToken -> Parse.token(TokenKind.IDENTIFIER)
+                            .then(Parse.success(() -> firstToken.value())));
 
-        var sourceText = SourceText.fromString("test", "state 123");
-        var reporter = new Reporter();
+            var sourceText = SourceText.fromString("test", "let x");
+            var reporter = new Reporter();
 
-        var result = tokenParser.tryParse(sourceText, reporter);
+            var result = parser.tryParse(sourceText, reporter);
 
-        assertTrue(result.isPresent());
-        assertTrue(reporter.hasErrors());
+            assertTrue(result.isPresent());
+            assertFalse(reporter.hasErrors());
 
-        var parsedToken = result.get();
-        assertEquals(parsedToken.kind(), TokenKind.KEYWORD_STATE);
+            assertEquals(result.get().kind(), TokenKind.KEYWORD_LET);
+        }
     }
 }
