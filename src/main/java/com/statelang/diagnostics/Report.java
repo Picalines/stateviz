@@ -2,7 +2,9 @@ package com.statelang.diagnostics;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
+import com.statelang.tokenization.SourceLocation;
 import com.statelang.tokenization.SourceSelection;
 import com.statelang.tokenization.TokenKind;
 
@@ -55,8 +57,42 @@ public final class Report {
 		return kind.severity;
 	}
 
+	public SourceLocation location() {
+		return selection.start();
+	}
+
 	@Override
 	public String toString() {
 		return severity() + " (" + selection + ") " + kind.name();
+	}
+
+	public static Report determineMostRelevant(Report first, Report second) {
+		if (first.severity() != second.severity()) {
+			return first.severity().ordinal() > second.severity().ordinal()
+					? first
+					: second;
+		}
+
+		if (first.selection().equals(second.selection())) {
+			var firstExpectedTokens = first.expectedTokenKinds.stream();
+			var secondExpectedTokens = second.expectedTokenKinds.stream();
+			var expectedTokenKinds = Stream.concat(firstExpectedTokens, secondExpectedTokens).toList();
+
+			return Report.builder()
+					.selection(first.selection())
+					.kind(first.kind())
+					.expectedTokenKinds(expectedTokenKinds)
+					.build();
+		}
+
+		if (first.location().equals(second.location())) {
+			return first.selection().end().isBefore(second.selection().end())
+					? first
+					: second;
+		}
+
+		return first.location().isAfter(second.location())
+				? first
+				: second;
 	}
 }

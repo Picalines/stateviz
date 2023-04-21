@@ -42,4 +42,8 @@ public abstract class Parser<T> {
     public final <U> Parser<U> then(Function<ParserState<T>, Parser<U>> nextParserCreator) {
         return new ThenParserWithState<>(this, nextParserCreator);
     }
+
+    public final Parser<T> or(Parser<T> parser) {
+        return new OrParser<>(this, parser);
+    }
 }
