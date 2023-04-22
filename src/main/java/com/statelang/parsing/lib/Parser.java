@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.statelang.diagnostics.Report;
 import com.statelang.diagnostics.Reporter;
@@ -75,5 +76,27 @@ public abstract class Parser<T> {
 
     public final Parser<List<T>> manyUntilEnd() {
         return new ManyUntilEndParser<>(this);
+    }
+
+    public final Parser<T> recover(Parser<T> recoveryParser) {
+        Preconditions.checkArgument(recoveryParser != null, "recoveryParser is null");
+
+        return new Parser<T>() {
+            @Override
+            public ParserResult<T> parse(ParserContext context) {
+                var result = Parser.this.parse(context);
+
+                if (!result.isSuccess()) {
+                    context.reporter().report(result.error());
+                    return recoveryParser.parse(context);
+                }
+
+                return result;
+            }
+        };
+    }
+
+    public final Parser<T> recover(T defaultValue) {
+        return recover(Parse.success(defaultValue));
     }
 }

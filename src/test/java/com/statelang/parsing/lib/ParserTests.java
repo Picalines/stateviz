@@ -4,10 +4,12 @@ import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithoutErro
 import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithErrors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
+import com.statelang.tokenization.Token;
 import com.statelang.tokenization.TokenKind;
 
 class ParserTests {
@@ -85,5 +87,20 @@ class ParserTests {
 
         assertIterableEquals(Arrays.asList(1.0, 2.0, 3.0), assertParsesWithoutErrors("1 2 3", parser));
         assertParsesWithErrors("1 2 3 x", parser);
+    }
+
+    @Test
+    void recover() {
+        var parser = Parse.token(TokenKind.KEYWORD_LET)
+                .then(Parse.token(TokenKind.IDENTIFIER))
+                .map(Token::text)
+                .then(varName -> Parse.token(TokenKind.SEMICOLON).recover((Token) null)
+                        .map(() -> varName.value()));
+
+        assertEquals("x", assertParsesWithoutErrors("let x;", parser));
+
+        var result = assertParsesWithErrors("let y", parser);
+        assertTrue(result.isPresent());
+        assertEquals("y", result.get());
     }
 }
