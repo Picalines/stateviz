@@ -1,4 +1,4 @@
-package com.statelang.parsing;
+package com.statelang.parsing.lib;
 
 import com.google.common.base.Preconditions;
 import com.statelang.diagnostics.Report;

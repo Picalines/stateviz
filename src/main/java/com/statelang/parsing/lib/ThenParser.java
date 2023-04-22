@@ -1,4 +1,4 @@
-package com.statelang.parsing;
+package com.statelang.parsing.lib;
 
 import lombok.AllArgsConstructor;
 

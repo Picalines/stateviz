@@ -1,4 +1,4 @@
-package com.statelang.parsing;
+package com.statelang.parsing.lib;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

@@ -1,11 +1,11 @@
-package com.statelang.parsing;
+package com.statelang.parsing.lib;
 
+import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithoutErrors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
+import com.statelang.parsing.lib.Parse;
 import com.statelang.tokenization.TokenKind;
-
-import static com.statelang.parsing.ParsingTestUtils.assertParsesWithoutErrors;
 
 class ParserTests {
 
