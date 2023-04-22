@@ -40,4 +40,13 @@ class ParserTests {
         token = assertParsesWithoutErrors("let", parser);
         assertEquals(token.kind(), TokenKind.KEYWORD_LET);
     }
+
+    @Test
+    void map() {
+        var parser = Parse.token(TokenKind.LITERAL_NUMBER)
+            .map(token -> Double.valueOf(token.text()));
+
+        var number = assertParsesWithoutErrors("123.5", parser);
+        assertEquals(123.5d, number);
+    }
 }

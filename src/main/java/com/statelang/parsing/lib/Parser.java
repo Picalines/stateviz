@@ -46,4 +46,16 @@ public abstract class Parser<T> {
     public final Parser<T> or(Parser<T> parser) {
         return new OrParser<>(this, parser);
     }
+
+    public final <U> Parser<U> map(Function<T, U> successMapper) {
+        return new Parser<U>() {
+            @Override
+            public ParserResult<U> parse(ParserContext context) {
+                var result = Parser.this.parse(context);
+                return result.isSuccess()
+                        ? ParserResult.fromValue(successMapper.apply(result.value()))
+                        : ParserResult.fromError(result.error());
+            }
+        };
+    }
 }
