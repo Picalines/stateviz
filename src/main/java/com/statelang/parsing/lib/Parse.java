@@ -104,4 +104,25 @@ public final class Parse {
             }
         };
     }
+
+    public static <T> Parser<T> skipUntil(Parser<T> parser) {
+        Preconditions.checkArgument(parser != null, "parser is null");
+
+        return new Parser<T>() {
+            @Override
+            public ParserResult<T> parse(ParserContext context) {
+                var reader = context.reader();
+
+                do {
+                    var result = parser.parse(context);
+
+                    if (result.isSuccess()) {
+                        return result;
+                    }
+                } while (reader.tryAdvance());
+
+                return parser.parse(context);
+            }
+        };
+    }
 }

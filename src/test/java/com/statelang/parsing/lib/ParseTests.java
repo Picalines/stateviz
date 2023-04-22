@@ -143,4 +143,13 @@ class ParseTests {
         assertEquals(-1.25, assertParsesWithoutErrors("-1.25", parser));
         assertEquals(1.25, assertParsesWithoutErrors("1.25", parser));
     }
+
+    @Test
+    void skipUntil() {
+        var parser = Parse.skipUntil(Parse.token(TokenKind.SEMICOLON))
+                .map(() -> "success");
+
+        assertEquals("success", assertParsesWithoutErrors("1 2 3 4 5 ;", parser));
+        assertParsesWithErrors("1 2 3 4 5", parser);
+    }
 }
