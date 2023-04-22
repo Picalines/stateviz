@@ -13,6 +13,7 @@ public final class Parse {
     }
 
     public static <T> Parser<T> success(Supplier<T> valueSupplier) {
+        Preconditions.checkArgument(valueSupplier != null, "valueSupplier is null");
         return new Parser<>() {
             @Override
             public ParserResult<T> parse(ParserContext context) {
@@ -47,6 +48,8 @@ public final class Parse {
     }
 
     public static <T> Parser<T> recursive(Function<Parser<T>, Parser<T>> recursiveParserCreator) {
+        Preconditions.checkArgument(recursiveParserCreator != null, "recursiveParserCreator is null");
+
         var recParser = new Parser<T>() {
             public Parser<T> recursiveRef = null;
 
@@ -66,6 +69,11 @@ public final class Parse {
             Parser<TTerm> restTermsParser,
             Parser<TOperator> operatorParser,
             ChainOperatorApplier<TOperator, TTerm> apply) {
+        Preconditions.checkArgument(firstTermParser != null, "firstTermParser is null");
+        Preconditions.checkArgument(restTermsParser != null, "restTermsParser is null");
+        Preconditions.checkArgument(operatorParser != null, "operatorParser is null");
+        Preconditions.checkArgument(apply != null, "apply is null");
+
         return new ChainOperatorParser<>(firstTermParser, restTermsParser, operatorParser, apply);
     }
 
@@ -77,6 +85,8 @@ public final class Parse {
     }
 
     public static <T> Parser<T> optional(Parser<T> parser) {
+        Preconditions.checkArgument(parser != null, "parser is null");
+
         return new Parser<T>() {
             @Override
             public ParserResult<T> parse(ParserContext context) {
