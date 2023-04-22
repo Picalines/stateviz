@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.statelang.diagnostics.Report;
-import com.statelang.parsing.lib.Parse;
-import com.statelang.parsing.lib.Parser;
 import com.statelang.tokenization.Token;
 import com.statelang.tokenization.TokenKind;
 
@@ -89,5 +87,16 @@ class ParseTests {
 
         var errorResult = assertParsesWithErrors("123", parser);
         assertTrue(errorResult.isEmpty());
+    }
+
+    @Test
+    void recursive() {
+        var parser = Parse.<String>recursive(recursion -> {
+            return Parse.token(TokenKind.LITERAL_NUMBER).then(recursion)
+                    .or(Parse.token(TokenKind.DOT).then(Parse.success("success")));
+        });
+
+        var result = assertParsesWithoutErrors("1 2 3 .", parser);
+        assertEquals(result, "success");
     }
 }

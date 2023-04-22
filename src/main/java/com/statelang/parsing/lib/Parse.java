@@ -1,5 +1,6 @@
 package com.statelang.parsing.lib;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.google.common.base.Preconditions;
@@ -43,5 +44,20 @@ public final class Parse {
             case 2 -> parsers[0].or(parsers[1]);
             default -> new OneOfParser<>(parsers);
         };
+    }
+
+    public static <T> Parser<T> recursive(Function<Parser<T>, Parser<T>> recursiveParserCreator) {
+        var recParser = new Parser<T>() {
+            public Parser<T> recursiveRef = null;
+
+            @Override
+            public ParserResult<T> parse(ParserContext context) {
+                return recursiveRef.parse(context);
+            }
+        };
+
+        recParser.recursiveRef = recursiveParserCreator.apply(recParser);
+
+        return recParser;
     }
 }

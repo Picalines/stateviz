@@ -4,7 +4,6 @@ import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithoutErro
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
-import com.statelang.parsing.lib.Parse;
 import com.statelang.tokenization.TokenKind;
 
 class ParserTests {
