@@ -3,6 +3,7 @@ package com.statelang.parsing.lib;
 import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithErrors;
 import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithoutErrors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.stream.Stream;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import com.statelang.diagnostics.Report;
 import com.statelang.tokenization.Token;
 import com.statelang.tokenization.TokenKind;
+
+import lombok.AllArgsConstructor;
 
 class ParseTests {
 
@@ -98,5 +101,35 @@ class ParseTests {
 
         var result = assertParsesWithoutErrors("1 2 3 .", parser);
         assertEquals(result, "success");
+    }
+
+    @Test
+    void chain() {
+        abstract class Term {
+        }
+
+        @AllArgsConstructor
+        @SuppressWarnings("unused")
+        final class TokenTerm extends Term {
+            public final Token token;
+        }
+
+        @AllArgsConstructor
+        @SuppressWarnings("unused")
+        final class SumTerm extends Term {
+            public final Term leftTerm;
+            public final Term rightTerm;
+        }
+
+        var termParser = Parse.token(TokenKind.LITERAL_NUMBER)
+                .then(token -> Parse.success(() -> (Term) new TokenTerm(token.value())));
+
+        var operatorParser = Parse.token(TokenKind.OPERATOR_PLUS);
+
+        var parser = Parse.chain(termParser, operatorParser, (op, a, b) -> new SumTerm(a, b));
+
+        var result = assertParsesWithoutErrors("1 + 2 + 3", parser);
+
+        assertInstanceOf(SumTerm.class, result);
     }
 }

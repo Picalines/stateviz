@@ -60,4 +60,19 @@ public final class Parse {
 
         return recParser;
     }
+
+    public static <TTerm, TOperator> Parser<TTerm> chain(
+            Parser<TTerm> firstTermParser,
+            Parser<TTerm> restTermsParser,
+            Parser<TOperator> operatorParser,
+            ChainOperatorApplier<TOperator, TTerm> apply) {
+        return new ChainOperatorParser<>(firstTermParser, restTermsParser, operatorParser, apply);
+    }
+
+    public static <TTerm, TOperator> Parser<TTerm> chain(
+            Parser<TTerm> termParser,
+            Parser<TOperator> operatorParser,
+            ChainOperatorApplier<TOperator, TTerm> apply) {
+        return chain(termParser, termParser, operatorParser, apply);
+    }
 }
