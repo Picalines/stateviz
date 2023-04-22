@@ -3,6 +3,9 @@ package com.statelang.parsing.lib;
 import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithoutErrors;
 import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithErrors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 import com.statelang.tokenization.TokenKind;
@@ -60,5 +63,27 @@ class ParserTests {
         assertEquals(-1, assertParsesWithoutErrors("-", parser));
 
         assertParsesWithErrors("", parser);
+    }
+
+    @Test
+    void many() {
+        var numberParser = Parse.token(TokenKind.LITERAL_NUMBER)
+                .map(token -> Double.valueOf(token.text()));
+
+        var parser = numberParser.many();
+
+        assertIterableEquals(Arrays.asList(1.0, 2.0, 3.0), assertParsesWithoutErrors("1 2 3", parser));
+        assertIterableEquals(Arrays.asList(1.0, 2.0, 3.0), assertParsesWithErrors("1 2 3 x", parser).get());
+    }
+
+    @Test
+    void manyUntilEnd() {
+        var numberParser = Parse.token(TokenKind.LITERAL_NUMBER)
+                .map(token -> Double.valueOf(token.text()));
+
+        var parser = numberParser.manyUntilEnd();
+
+        assertIterableEquals(Arrays.asList(1.0, 2.0, 3.0), assertParsesWithoutErrors("1 2 3", parser));
+        assertParsesWithErrors("1 2 3 x", parser);
     }
 }

@@ -1,5 +1,6 @@
 package com.statelang.parsing.lib;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -66,5 +67,13 @@ public abstract class Parser<T> {
 
     public final <U> Parser<U> as(U successValue) {
         return map(() -> successValue);
+    }
+
+    public final Parser<List<T>> many() {
+        return new ManyParser<>(this);
+    }
+
+    public final Parser<List<T>> manyUntilEnd() {
+        return new ManyUntilEndParser<>(this);
     }
 }
