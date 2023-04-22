@@ -3,6 +3,7 @@ package com.statelang.parsing.lib;
 import java.util.Optional;
 import java.util.function.Function;
 
+import com.google.common.base.Supplier;
 import com.statelang.diagnostics.Report;
 import com.statelang.diagnostics.Reporter;
 import com.statelang.tokenization.SourceText;
@@ -57,5 +58,13 @@ public abstract class Parser<T> {
                         : ParserResult.fromError(result.error());
             }
         };
+    }
+
+    public final <U> Parser<U> map(Supplier<U> successSupplier) {
+        return map(ignored -> successSupplier.get());
+    }
+
+    public final <U> Parser<U> as(U successValue) {
+        return map(() -> successValue);
     }
 }

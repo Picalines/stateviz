@@ -75,4 +75,23 @@ public final class Parse {
             ChainOperatorApplier<TOperator, TTerm> apply) {
         return chain(termParser, termParser, operatorParser, apply);
     }
+
+    public static <T> Parser<T> optional(Parser<T> parser) {
+        return new Parser<T>() {
+            @Override
+            public ParserResult<T> parse(ParserContext context) {
+                var reader = context.reader();
+
+                try (var startBookmark = reader.createBookmark()) {
+                    var result = parser.parse(context);
+
+                    if (!result.isSuccess()) {
+                        reader.backtrackTo(startBookmark);
+                    }
+
+                    return result;
+                }
+            }
+        };
+    }
 }

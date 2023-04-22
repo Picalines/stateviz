@@ -96,7 +96,7 @@ class ParseTests {
     void recursive() {
         var parser = Parse.<String>recursive(recursion -> {
             return Parse.token(TokenKind.LITERAL_NUMBER).then(recursion)
-                    .or(Parse.token(TokenKind.DOT).then(Parse.success("success")));
+                    .or(Parse.token(TokenKind.DOT).map(() -> "success"));
         });
 
         var result = assertParsesWithoutErrors("1 2 3 .", parser);
@@ -122,7 +122,7 @@ class ParseTests {
         }
 
         var termParser = Parse.token(TokenKind.LITERAL_NUMBER)
-                .then(token -> Parse.success(() -> (Term) new TokenTerm(token.value())));
+                .map(token -> (Term) new TokenTerm(token));
 
         var operatorParser = Parse.token(TokenKind.OPERATOR_PLUS);
 
@@ -131,5 +131,16 @@ class ParseTests {
         var result = assertParsesWithoutErrors("1 + 2 + 3", parser);
 
         assertInstanceOf(SumTerm.class, result);
+    }
+
+    @Test
+    void optional() {
+        var parser = Parse.optional(Parse.token(TokenKind.OPERATOR_MINUS).as(-1)).or(Parse.success(1))
+                .then(sign -> Parse.token(TokenKind.LITERAL_NUMBER)
+                        .map(token -> Double.valueOf(token.text()))
+                        .map(num -> sign.value() * num));
+
+        assertEquals(-1.25, assertParsesWithoutErrors("-1.25", parser));
+        assertEquals(1.25, assertParsesWithoutErrors("1.25", parser));
     }
 }

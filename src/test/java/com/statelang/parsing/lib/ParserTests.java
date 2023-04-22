@@ -1,6 +1,7 @@
 package com.statelang.parsing.lib;
 
 import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithoutErrors;
+import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithErrors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
@@ -44,9 +45,20 @@ class ParserTests {
     @Test
     void map() {
         var parser = Parse.token(TokenKind.LITERAL_NUMBER)
-            .map(token -> Double.valueOf(token.text()));
+                .map(token -> Double.valueOf(token.text()));
 
         var number = assertParsesWithoutErrors("123.5", parser);
         assertEquals(123.5d, number);
+    }
+
+    @Test
+    void as() {
+        var parser = Parse.token(TokenKind.OPERATOR_PLUS).as(1)
+                .or(Parse.token(TokenKind.OPERATOR_MINUS).as(-1));
+
+        assertEquals(1, assertParsesWithoutErrors("+", parser));
+        assertEquals(-1, assertParsesWithoutErrors("-", parser));
+
+        assertParsesWithErrors("", parser);
     }
 }
