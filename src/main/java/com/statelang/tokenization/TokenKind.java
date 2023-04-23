@@ -19,11 +19,11 @@ public enum TokenKind {
 
 	KEYWORD_STATE("'state'", "\\bstate\\b"),
 	KEYWORD_ASSERT("'assert'", "\\bassert\\b"),
+	KEYWORD_WHEN("'when'", "\\bwhen\\b"),
 	KEYWORD_LET("'let'", "\\blet\\b"),
 	KEYWORD_CONST("'const'", "\\bconst\\b"),
 	KEYWORD_IF("'if'", "\\bif\\b"),
 	KEYWORD_ELSE("'else'", "\\belse\\b"),
-	KEYWORD_GOTO("'goto'", "\\bgoto\\b"),
 
 	OPERATOR_ASSIGN("':='", ":="),
 	OPERATOR_NOT_EQUALS("'!='", "!="),
