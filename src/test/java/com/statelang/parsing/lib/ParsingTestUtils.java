@@ -8,7 +8,7 @@ import java.util.Optional;
 import com.statelang.diagnostics.Reporter;
 import com.statelang.tokenization.SourceText;
 
-final class ParsingTestUtils {
+public final class ParsingTestUtils {
     private ParsingTestUtils() {
     }
 

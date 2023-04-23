@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.statelang.diagnostics.Report;
@@ -66,6 +68,10 @@ public abstract class Parser<T> {
         return map(ignored -> successSupplier.get());
     }
 
+    public final <U> Parser<U> cast(Class<U> clazz) {
+        return map(clazz::cast);
+    }
+
     public final <U> Parser<U> as(U successValue) {
         return map(() -> successValue);
     }
@@ -78,7 +84,7 @@ public abstract class Parser<T> {
         return new ManyUntilEndParser<>(this);
     }
 
-    public final Parser<T> recover(Parser<T> recoveryParser) {
+    public final Parser<T> recover(Parser<T> recoveryParser, @Nullable Report.Kind overrideReportKind) {
         Preconditions.checkArgument(recoveryParser != null, "recoveryParser is null");
 
         return new Parser<T>() {
@@ -87,7 +93,14 @@ public abstract class Parser<T> {
                 var result = Parser.this.parse(context);
 
                 if (!result.isSuccess()) {
-                    context.reporter().report(result.error());
+                    var error = result.error();
+
+                    if (overrideReportKind != null) {
+                        error = error.toBuilder().kind(overrideReportKind).build();
+                    }
+
+                    context.reporter().report(error);
+
                     return recoveryParser.parse(context);
                 }
 
@@ -96,7 +109,19 @@ public abstract class Parser<T> {
         };
     }
 
+    public final Parser<T> recover(Parser<T> recoveryParser) {
+        return recover(recoveryParser, null);
+    }
+
+    public final Parser<T> recover(T defaultValue, @Nullable Report.Kind overrideReportKind) {
+        return recover(Parse.success(defaultValue), overrideReportKind);
+    }
+
     public final Parser<T> recover(T defaultValue) {
-        return recover(Parse.success(defaultValue));
+        return recover(defaultValue, null);
+    }
+
+    public final Parser<T> between(Parser<?> leftSideParser, Parser<?> rightSideParser) {
+        return leftSideParser.then(this.then(result -> rightSideParser.map(() -> result.value())));
     }
 }

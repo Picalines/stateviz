@@ -36,13 +36,22 @@ public final class Parse {
     }
 
     @SafeVarargs
-    public static <T> Parser<T> oneOf(Parser<T>... parsers) {
+    public static <T> Parser<T>[] commonBaseUpcast(Parser<? extends T>... parsers) {
+        @SuppressWarnings("unchecked")
+        var castedParsers = (Parser<T>[]) parsers;
+        return castedParsers;
+    }
+
+    @SafeVarargs
+    public static <T> Parser<T> oneOf(Parser<? extends T>... parsers) {
         Preconditions.checkArgument(parsers.length >= 1, "Parse.oneOf expects at least one parser");
 
+        var castedParsers = commonBaseUpcast(parsers);
+
         return switch (parsers.length) {
-            case 1 -> parsers[0];
-            case 2 -> parsers[0].or(parsers[1]);
-            default -> new OneOfParser<>(parsers);
+            case 1 -> castedParsers[0];
+            case 2 -> castedParsers[0].or(castedParsers[1]);
+            default -> new OneOfParser<>(castedParsers);
         };
     }
 

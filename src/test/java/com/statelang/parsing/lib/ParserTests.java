@@ -27,7 +27,7 @@ class ParserTests {
     void thenWithState() {
         var parser = Parse.token(Token.Kind.KEYWORD_LET)
                 .then(firstToken -> Parse.token(Token.Kind.IDENTIFIER)
-                        .then(Parse.success(() -> firstToken.value())));
+                        .then(Parse.success(firstToken::value)));
 
         var token = assertParsesWithoutErrors("let x", parser);
 
@@ -94,7 +94,7 @@ class ParserTests {
                 .then(Parse.token(Token.Kind.IDENTIFIER))
                 .map(Token::text)
                 .then(varName -> Parse.token(Token.Kind.SEMICOLON).recover((Token) null)
-                        .map(() -> varName.value()));
+                        .map(varName::value));
 
         assertEquals("x", assertParsesWithoutErrors("let x;", parser));
 

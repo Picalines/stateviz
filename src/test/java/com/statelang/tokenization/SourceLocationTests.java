@@ -23,7 +23,7 @@ class SourceLocationTests {
 	class ComparableTest {
 		@Test
 		void equals() {
-			assertTrue(new SourceLocation(1, 1).compareTo(new SourceLocation(1, 1)) == 0);
+			assertEquals(0, new SourceLocation(1, 1).compareTo(new SourceLocation(1, 1)));
 		}
 
 		@Test
@@ -89,7 +89,7 @@ class SourceLocationTests {
 
 		assertEquals(new SourceLocation(2, 1), location.movedTrough("line\n"));
 		assertEquals(new SourceLocation(2, 1), location.movedTrough("\n"));
-		
+
 		assertEquals(new SourceLocation(3, 1), location.movedTrough("\n\n"));
 		assertEquals(new SourceLocation(3, 4), location.movedTrough("line\n\ntxt"));
 	}

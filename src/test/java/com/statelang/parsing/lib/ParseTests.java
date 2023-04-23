@@ -93,10 +93,8 @@ class ParseTests {
 
     @Test
     void recursive() {
-        var parser = Parse.<String>recursive(recursion -> {
-            return Parse.token(Token.Kind.LITERAL_NUMBER).then(recursion)
-                    .or(Parse.token(Token.Kind.DOT).map(() -> "success"));
-        });
+        var parser = Parse.<String>recursive(recursion -> Parse.token(Token.Kind.LITERAL_NUMBER).then(recursion)
+                .or(Parse.token(Token.Kind.DOT).map(() -> "success")));
 
         var result = assertParsesWithoutErrors("1 2 3 .", parser);
         assertEquals("success", result);

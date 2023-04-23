@@ -16,7 +16,7 @@ import lombok.experimental.Accessors;
 
 @Accessors(fluent = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
+@Builder(toBuilder = true)
 public final class Report {
 
 	public static enum Severity {
@@ -29,7 +29,9 @@ public final class Report {
 		INVALID_TOKEN(Severity.ERROR),
 		UNEXPECTED_TOKEN(Severity.ERROR),
 		UNEXPECTED_END_OF_INPUT(Severity.ERROR),
-		END_OF_INPUT_EXPECTED(Severity.ERROR);
+		END_OF_INPUT_EXPECTED(Severity.ERROR),
+
+		VALUE_EXPRESSION_EXPECTED(Severity.ERROR);
 
 		@Getter
 		private final Severity severity;

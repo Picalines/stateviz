@@ -51,7 +51,7 @@ public final class Token {
 		OPERATOR_OR("'or'", "\\bor\\b"),
 		OPERATOR_NOT("'not'", "\\bnot\\b"),
 
-		IDENTIFIER("identifier", "\\b[a-zA-Z][a-zA-Z0-9]*\\b");
+		IDENTIFIER("identifier", "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b");
 
 		@Getter
 		private final boolean ignored;
@@ -79,26 +79,19 @@ public final class Token {
 	@Getter
 	private final Kind kind;
 
+	@Getter
+	private final String text;
+
 	private final SourceText sourceText;
-
-	private final int length;
-
-	private final int sourceIndex;
 
 	Token(SourceText sourceText, SourceLocation startLocation, int sourceIndex, int length, Kind kind) {
 		this.sourceText = sourceText;
-		this.sourceIndex = sourceIndex;
-		this.length = length;
 		this.kind = kind;
 
-		String text = this.text();
+		text = sourceText.text().substring(sourceIndex, sourceIndex + length);
 
 		this.selection = new SourceSelection(startLocation,
 				startLocation.movedTrough(text.substring(0, text.length() - 1)));
-	}
-
-	public String text() {
-		return sourceText.text().substring(sourceIndex, sourceIndex + length);
 	}
 
 	@Override

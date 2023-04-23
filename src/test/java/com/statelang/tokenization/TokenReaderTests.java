@@ -179,6 +179,7 @@ class TokenReaderTests {
         var reader = createReader("'state'", new Reporter());
 
         assertFalse(reader.tryAdvance());
+        assertNotNull(reader.currentToken());
         assertEquals(Token.Kind.LITERAL_STRING, reader.currentToken().kind());
     }
 }

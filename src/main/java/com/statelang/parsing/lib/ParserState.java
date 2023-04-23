@@ -3,9 +3,12 @@ package com.statelang.parsing.lib;
 import java.util.Stack;
 
 import com.google.common.base.Preconditions;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
-final class ParserState<T> {
-    
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
+public final class ParserState<T> {
+
     private final Stack<T> values = new Stack<>();
 
     public T value() {
