@@ -2,6 +2,10 @@ package com.statelang.tokenization;
 
 import java.util.regex.Pattern;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
+
+@Accessors(fluent = true)
 public enum TokenKind {
 	WHITESPACE("whitespace", "\\s+", true),
 	COMMENT("comment", "#.*\\n?", true),
@@ -47,10 +51,13 @@ public enum TokenKind {
 
 	IDENTIFIER("identifier", "\\b[a-zA-Z][a-zA-Z0-9]*\\b");
 
+	@Getter
 	private final boolean ignored;
 
+	@Getter
 	private final String description;
 
+	@Getter
 	private final Pattern regex;
 
 	private TokenKind(String description, String regex, boolean ignored) {
@@ -61,21 +68,5 @@ public enum TokenKind {
 
 	private TokenKind(String description, String regex) {
 		this(description, regex, false);
-	}
-
-	public int priority() {
-		return ordinal();
-	}
-
-	public boolean ignored() {
-		return ignored;
-	}
-
-	public String description() {
-		return description;
-	}
-
-	public Pattern regex() {
-		return regex;
 	}
 }
