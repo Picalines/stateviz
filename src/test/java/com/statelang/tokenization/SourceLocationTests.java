@@ -84,13 +84,13 @@ class SourceLocationTests {
 	void movedTrough() {
 		var location = new SourceLocation(1, 1);
 
-		assertEquals(location.movedTrough("x"), new SourceLocation(1, 2));
-		assertEquals(location.movedTrough("txt"), new SourceLocation(1, 4));
+		assertEquals(new SourceLocation(1, 2), location.movedTrough("x"));
+		assertEquals(new SourceLocation(1, 4), location.movedTrough("txt"));
 
-		assertEquals(location.movedTrough("line\n"), new SourceLocation(2, 1));
-		assertEquals(location.movedTrough("\n"), new SourceLocation(2, 1));
+		assertEquals(new SourceLocation(2, 1), location.movedTrough("line\n"));
+		assertEquals(new SourceLocation(2, 1), location.movedTrough("\n"));
 		
-		assertEquals(location.movedTrough("\n\n"), new SourceLocation(3, 1));
-		assertEquals(location.movedTrough("line\n\ntxt"), new SourceLocation(3, 4));
+		assertEquals(new SourceLocation(3, 1), location.movedTrough("\n\n"));
+		assertEquals(new SourceLocation(3, 4), location.movedTrough("line\n\ntxt"));
 	}
 }

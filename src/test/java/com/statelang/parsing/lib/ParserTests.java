@@ -31,7 +31,7 @@ class ParserTests {
 
         var token = assertParsesWithoutErrors("let x", parser);
 
-        assertEquals(token.kind(), Token.Kind.KEYWORD_LET);
+        assertEquals(Token.Kind.KEYWORD_LET, token.kind());
     }
 
     @Test
@@ -40,10 +40,10 @@ class ParserTests {
                 .or(Parse.token(Token.Kind.KEYWORD_LET));
 
         var token = assertParsesWithoutErrors("const", parser);
-        assertEquals(token.kind(), Token.Kind.KEYWORD_CONST);
+        assertEquals(Token.Kind.KEYWORD_CONST, token.kind());
 
         token = assertParsesWithoutErrors("let", parser);
-        assertEquals(token.kind(), Token.Kind.KEYWORD_LET);
+        assertEquals(Token.Kind.KEYWORD_LET, token.kind());
     }
 
     @Test

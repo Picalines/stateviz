@@ -36,7 +36,7 @@ class ParseTests {
 
             var parsedToken = assertParsesWithoutErrors("state", tokenParser);
 
-            assertEquals(parsedToken.kind(), Token.Kind.KEYWORD_STATE);
+            assertEquals(Token.Kind.KEYWORD_STATE, parsedToken.kind());
         }
 
         @Test
@@ -48,7 +48,7 @@ class ParseTests {
             assertTrue(result.isPresent());
 
             var parsedToken = result.get();
-            assertEquals(parsedToken.kind(), Token.Kind.KEYWORD_STATE);
+            assertEquals(Token.Kind.KEYWORD_STATE, parsedToken.kind());
         }
     }
 
@@ -58,7 +58,7 @@ class ParseTests {
 
         var result = assertParsesWithoutErrors("", parser);
 
-        assertEquals(result, "success");
+        assertEquals("success", result);
     }
 
     @Test
@@ -84,7 +84,7 @@ class ParseTests {
         for (var kind : tokenKinds) {
             var token = assertParsesWithoutErrors(tokens[i++], parser);
 
-            assertEquals(token.kind(), kind);
+            assertEquals(kind, token.kind());
         }
 
         var errorResult = assertParsesWithErrors("123", parser);
@@ -99,7 +99,7 @@ class ParseTests {
         });
 
         var result = assertParsesWithoutErrors("1 2 3 .", parser);
-        assertEquals(result, "success");
+        assertEquals("success", result);
     }
 
     @Test

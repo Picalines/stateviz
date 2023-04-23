@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -37,12 +38,12 @@ class TokenReaderTests {
 
         var token = reader.currentToken();
         assertNotNull(token);
-        assertEquals(token.kind(), Token.Kind.IDENTIFIER);
-        assertEquals(token.selection(), new SourceSelection(new SourceLocation(1, 1), new SourceLocation(1, 5)));
+        assertEquals(Token.Kind.IDENTIFIER, token.kind());
+        assertEquals(new SourceSelection(new SourceLocation(1, 1), new SourceLocation(1, 5)), token.selection());
 
         assertFalse(reader.tryAdvance());
         assertTrue(reader.atEnd());
-        assertEquals(reader.currentToken(), token);
+        assertSame(token, reader.currentToken());
 
         assertFalse(reporter.hasErrors());
     }
@@ -56,21 +57,21 @@ class TokenReaderTests {
 
         var token = reader.currentToken();
         assertNotNull(token);
-        assertEquals(token.kind(), Token.Kind.IDENTIFIER);
-        assertEquals(token.selection(), new SourceSelection(new SourceLocation(2, 2), new SourceLocation(2, 6)));
+        assertEquals(Token.Kind.IDENTIFIER, token.kind());
+        assertEquals(new SourceSelection(new SourceLocation(2, 2), new SourceLocation(2, 6)), token.selection());
 
         assertFalse(reader.tryAdvance());
         assertTrue(reader.atEnd());
-        assertEquals(reader.currentToken(), token);
+        assertEquals(token, reader.currentToken());
 
         assertTrue(reporter.hasErrors());
-        assertEquals(reporter.reports().size(), 1);
+        assertEquals(1, reporter.reports().size());
 
         var invalidCharReport = reporter.reports().get(0);
-        assertEquals(invalidCharReport.severity(), Report.Severity.ERROR);
+        assertEquals(Report.Severity.ERROR, invalidCharReport.severity());
 
         var invalidChatLocation = new SourceLocation(2, 7);
-        assertEquals(invalidCharReport.selection(), invalidChatLocation.toCharSelection());
+        assertEquals(invalidChatLocation.toCharSelection(), invalidCharReport.selection());
     }
 
     @Test
@@ -84,8 +85,8 @@ class TokenReaderTests {
             var currentToken = reader.currentToken();
             assertNotNull(currentToken);
 
-            assertEquals(currentToken.kind(), Token.Kind.LITERAL_NUMBER);
-            assertEquals(currentToken.text(), Integer.toString(num));
+            assertEquals(Token.Kind.LITERAL_NUMBER, currentToken.kind());
+            assertEquals(Integer.toString(num), currentToken.text());
 
             reader.tryAdvance();
         }
@@ -110,8 +111,8 @@ class TokenReaderTests {
                 var currentToken = reader.currentToken();
                 assertNotNull(currentToken);
 
-                assertEquals(currentToken.kind(), Token.Kind.LITERAL_NUMBER);
-                assertEquals(currentToken.text(), Integer.toString(num));
+                assertEquals(Token.Kind.LITERAL_NUMBER, currentToken.kind());
+                assertEquals(Integer.toString(num), currentToken.text());
 
                 reader.tryAdvance();
             }
