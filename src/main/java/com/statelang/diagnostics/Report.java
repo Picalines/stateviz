@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 
 import com.statelang.tokenization.SourceLocation;
 import com.statelang.tokenization.SourceSelection;
-import com.statelang.tokenization.TokenKind;
+import com.statelang.tokenization.Token;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -47,11 +47,11 @@ public final class Report {
 
 	@Getter
 	@Builder.Default
-	private final TokenKind unexpectedTokenKind = null;
+	private final Token.Kind unexpectedTokenKind = null;
 
 	@Getter
 	@Builder.Default
-	private final List<TokenKind> expectedTokenKinds = Collections.emptyList();
+	private final List<Token.Kind> expectedTokenKinds = Collections.emptyList();
 
 	public Severity severity() {
 		return kind.severity;

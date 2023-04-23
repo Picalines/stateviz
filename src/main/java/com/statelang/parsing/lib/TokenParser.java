@@ -6,22 +6,21 @@ import java.util.List;
 
 import com.statelang.diagnostics.Report;
 import com.statelang.tokenization.Token;
-import com.statelang.tokenization.TokenKind;
 
 final class TokenParser extends Parser<Token> {
 
-    private static final Hashtable<TokenKind, TokenParser> instances = new Hashtable<>();
+    private static final Hashtable<Token.Kind, TokenParser> instances = new Hashtable<>();
 
-    private final TokenKind tokenKind;
+    private final Token.Kind tokenKind;
 
-    private final List<TokenKind> expectedTokenKinds;
+    private final List<Token.Kind> expectedTokenKinds;
 
-    private TokenParser(TokenKind tokenKind) {
+    private TokenParser(Token.Kind tokenKind) {
         this.tokenKind = tokenKind;
         expectedTokenKinds = Arrays.asList(tokenKind);
     }
 
-    public static TokenParser of(TokenKind tokenKind) {
+    public static TokenParser of(Token.Kind tokenKind) {
         return instances.computeIfAbsent(tokenKind, TokenParser::new);
     }
 

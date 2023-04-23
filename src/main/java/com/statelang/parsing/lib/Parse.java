@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 import com.google.common.base.Preconditions;
 import com.statelang.diagnostics.Report;
 import com.statelang.tokenization.Token;
-import com.statelang.tokenization.TokenKind;
 
 public final class Parse {
     private Parse() {
@@ -31,7 +30,7 @@ public final class Parse {
         return ErrorParser.of(reportKind);
     }
 
-    public static Parser<Token> token(TokenKind tokenKind) {
+    public static Parser<Token> token(Token.Kind tokenKind) {
         Preconditions.checkArgument(tokenKind != null, "tokenKind is null");
         return TokenParser.of(tokenKind);
     }

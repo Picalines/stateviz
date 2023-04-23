@@ -37,7 +37,7 @@ class TokenReaderTests {
 
         var token = reader.currentToken();
         assertNotNull(token);
-        assertEquals(token.kind(), TokenKind.IDENTIFIER);
+        assertEquals(token.kind(), Token.Kind.IDENTIFIER);
         assertEquals(token.selection(), new SourceSelection(new SourceLocation(1, 1), new SourceLocation(1, 5)));
 
         assertFalse(reader.tryAdvance());
@@ -56,7 +56,7 @@ class TokenReaderTests {
 
         var token = reader.currentToken();
         assertNotNull(token);
-        assertEquals(token.kind(), TokenKind.IDENTIFIER);
+        assertEquals(token.kind(), Token.Kind.IDENTIFIER);
         assertEquals(token.selection(), new SourceSelection(new SourceLocation(2, 2), new SourceLocation(2, 6)));
 
         assertFalse(reader.tryAdvance());
@@ -84,7 +84,7 @@ class TokenReaderTests {
             var currentToken = reader.currentToken();
             assertNotNull(currentToken);
 
-            assertEquals(currentToken.kind(), TokenKind.LITERAL_NUMBER);
+            assertEquals(currentToken.kind(), Token.Kind.LITERAL_NUMBER);
             assertEquals(currentToken.text(), Integer.toString(num));
 
             reader.tryAdvance();
@@ -110,7 +110,7 @@ class TokenReaderTests {
                 var currentToken = reader.currentToken();
                 assertNotNull(currentToken);
 
-                assertEquals(currentToken.kind(), TokenKind.LITERAL_NUMBER);
+                assertEquals(currentToken.kind(), Token.Kind.LITERAL_NUMBER);
                 assertEquals(currentToken.text(), Integer.toString(num));
 
                 reader.tryAdvance();
@@ -133,7 +133,7 @@ class TokenReaderTests {
         var sourceBuilder = new StringBuilder();
 
         var addedAnyKeyword = false;
-        for (var kind : TokenKind.values()) {
+        for (var kind : Token.Kind.values()) {
             if (!kind.name().startsWith("KEYWORD")) {
                 continue;
             }
@@ -154,7 +154,7 @@ class TokenReaderTests {
         while (!reader.atEnd()) {
             var token = reader.currentToken();
             assertNotNull(token);
-            assertNotEquals(token.kind(), TokenKind.IDENTIFIER);
+            assertNotEquals(token.kind(), Token.Kind.IDENTIFIER);
 
             reader.tryAdvance();
         }
@@ -170,7 +170,7 @@ class TokenReaderTests {
         while (!reader.atEnd()) {
             var token = reader.currentToken();
             assertNotNull(token);
-            assertNotEquals(token.kind(), TokenKind.IDENTIFIER);
+            assertNotEquals(token.kind(), Token.Kind.IDENTIFIER);
 
             reader.tryAdvance();
         }

@@ -10,46 +10,45 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 import com.statelang.tokenization.Token;
-import com.statelang.tokenization.TokenKind;
 
 class ParserTests {
 
     @Test
     void then() {
-        var parser = Parse.token(TokenKind.KEYWORD_LET)
-                .then(Parse.token(TokenKind.IDENTIFIER))
-                .then(Parse.token(TokenKind.OPERATOR_EQUALS))
-                .then(Parse.token(TokenKind.LITERAL_NUMBER));
+        var parser = Parse.token(Token.Kind.KEYWORD_LET)
+                .then(Parse.token(Token.Kind.IDENTIFIER))
+                .then(Parse.token(Token.Kind.OPERATOR_EQUALS))
+                .then(Parse.token(Token.Kind.LITERAL_NUMBER));
 
         assertParsesWithoutErrors("let x = 123", parser);
     }
 
     @Test
     void thenWithState() {
-        var parser = Parse.token(TokenKind.KEYWORD_LET)
-                .then(firstToken -> Parse.token(TokenKind.IDENTIFIER)
+        var parser = Parse.token(Token.Kind.KEYWORD_LET)
+                .then(firstToken -> Parse.token(Token.Kind.IDENTIFIER)
                         .then(Parse.success(() -> firstToken.value())));
 
         var token = assertParsesWithoutErrors("let x", parser);
 
-        assertEquals(token.kind(), TokenKind.KEYWORD_LET);
+        assertEquals(token.kind(), Token.Kind.KEYWORD_LET);
     }
 
     @Test
     void or() {
-        var parser = Parse.token(TokenKind.KEYWORD_CONST)
-                .or(Parse.token(TokenKind.KEYWORD_LET));
+        var parser = Parse.token(Token.Kind.KEYWORD_CONST)
+                .or(Parse.token(Token.Kind.KEYWORD_LET));
 
         var token = assertParsesWithoutErrors("const", parser);
-        assertEquals(token.kind(), TokenKind.KEYWORD_CONST);
+        assertEquals(token.kind(), Token.Kind.KEYWORD_CONST);
 
         token = assertParsesWithoutErrors("let", parser);
-        assertEquals(token.kind(), TokenKind.KEYWORD_LET);
+        assertEquals(token.kind(), Token.Kind.KEYWORD_LET);
     }
 
     @Test
     void map() {
-        var parser = Parse.token(TokenKind.LITERAL_NUMBER)
+        var parser = Parse.token(Token.Kind.LITERAL_NUMBER)
                 .map(token -> Double.valueOf(token.text()));
 
         var number = assertParsesWithoutErrors("123.5", parser);
@@ -58,8 +57,8 @@ class ParserTests {
 
     @Test
     void as() {
-        var parser = Parse.token(TokenKind.OPERATOR_PLUS).as(1)
-                .or(Parse.token(TokenKind.OPERATOR_MINUS).as(-1));
+        var parser = Parse.token(Token.Kind.OPERATOR_PLUS).as(1)
+                .or(Parse.token(Token.Kind.OPERATOR_MINUS).as(-1));
 
         assertEquals(1, assertParsesWithoutErrors("+", parser));
         assertEquals(-1, assertParsesWithoutErrors("-", parser));
@@ -69,7 +68,7 @@ class ParserTests {
 
     @Test
     void many() {
-        var numberParser = Parse.token(TokenKind.LITERAL_NUMBER)
+        var numberParser = Parse.token(Token.Kind.LITERAL_NUMBER)
                 .map(token -> Double.valueOf(token.text()));
 
         var parser = numberParser.many();
@@ -80,7 +79,7 @@ class ParserTests {
 
     @Test
     void manyUntilEnd() {
-        var numberParser = Parse.token(TokenKind.LITERAL_NUMBER)
+        var numberParser = Parse.token(Token.Kind.LITERAL_NUMBER)
                 .map(token -> Double.valueOf(token.text()));
 
         var parser = numberParser.manyUntilEnd();
@@ -91,10 +90,10 @@ class ParserTests {
 
     @Test
     void recover() {
-        var parser = Parse.token(TokenKind.KEYWORD_LET)
-                .then(Parse.token(TokenKind.IDENTIFIER))
+        var parser = Parse.token(Token.Kind.KEYWORD_LET)
+                .then(Parse.token(Token.Kind.IDENTIFIER))
                 .map(Token::text)
-                .then(varName -> Parse.token(TokenKind.SEMICOLON).recover((Token) null)
+                .then(varName -> Parse.token(Token.Kind.SEMICOLON).recover((Token) null)
                         .map(() -> varName.value()));
 
         assertEquals("x", assertParsesWithoutErrors("let x;", parser));

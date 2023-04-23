@@ -32,7 +32,7 @@ final class Tokenizer implements Iterator<Token> {
 			throw new NoSuchElementException();
 		}
 
-		for (final var tokenKind : TokenKind.values()) {
+		for (final var tokenKind : Token.Kind.values()) {
 			final var matcher = tokenKind.regex().matcher(sourceText.text());
 
 			if (!matcher.find(index) || matcher.start() != index) {
