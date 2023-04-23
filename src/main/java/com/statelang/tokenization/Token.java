@@ -23,6 +23,10 @@ public final class Token {
 		OPEN_CURLY_BRACE("'{'", "\\{"),
 		CLOSE_CURLY_BRACE("'}'", "\\}"),
 
+		LITERAL_NUMBER("number literal", "\\d+(\\.\\d+)?|\\.\\d+"),
+		LITERAL_BOOLEAN("boolean literal", "\\b(true|false)\\b"),
+		LITERAL_STRING("string literal", "'.*?'"),
+
 		KEYWORD_STATE("'state'", "\\bstate\\b"),
 		KEYWORD_ASSERT("'assert'", "\\bassert\\b"),
 		KEYWORD_WHEN("'when'", "\\bwhen\\b"),
@@ -46,10 +50,6 @@ public final class Token {
 		OPERATOR_AND("'and'", "\\band\\b"),
 		OPERATOR_OR("'or'", "\\bor\\b"),
 		OPERATOR_NOT("'not'", "\\bnot\\b"),
-
-		LITERAL_NUMBER("number literal", "\\d+(\\.\\d+)?|\\.\\d+"),
-		LITERAL_BOOLEAN("boolean literal", "\\b(true|false)\\b"),
-		LITERAL_STRING("string literal", "'\\.*?'"),
 
 		IDENTIFIER("identifier", "\\b[a-zA-Z][a-zA-Z0-9]*\\b");
 

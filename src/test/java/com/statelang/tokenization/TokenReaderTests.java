@@ -163,10 +163,7 @@ class TokenReaderTests {
 
     @Test
     void booleanLiteralOverIdentifier() {
-        var sourceText = SourceText.fromString("test", "true\nfalse");
-
-        var reporter = new Reporter();
-        var reader = TokenReader.startReading(sourceText, reporter);
+        var reader = createReader("true\nfalse", new Reporter());
 
         while (!reader.atEnd()) {
             var token = reader.currentToken();
@@ -177,4 +174,11 @@ class TokenReaderTests {
         }
     }
 
+    @Test
+    void stringLiteralOverKeyword() {
+        var reader = createReader("'state'", new Reporter());
+
+        assertFalse(reader.tryAdvance());
+        assertEquals(Token.Kind.LITERAL_STRING, reader.currentToken().kind());
+    }
 }
