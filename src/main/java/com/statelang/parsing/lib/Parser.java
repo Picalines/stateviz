@@ -22,10 +22,12 @@ public abstract class Parser<T> {
         var result = parse(new ParserContext(reader, reporter));
 
         if (!reader.atEnd()) {
-            reporter.report(Report.builder()
+            reporter.report(
+                Report.builder()
                     .selection(reader.selection())
                     .kind(Report.Kind.END_OF_INPUT_EXPECTED)
-                    .unexpectedTokenKind(reader.currentToken().kind()));
+                    .unexpectedTokenKind(reader.currentToken().kind())
+            );
 
             while (reader.tryAdvance()) {
                 // yield errors on invalid tokens
@@ -58,8 +60,8 @@ public abstract class Parser<T> {
             public ParserResult<U> parse(ParserContext context) {
                 var result = Parser.this.parse(context);
                 return result.isSuccess()
-                        ? ParserResult.fromValue(successMapper.apply(result.value()))
-                        : ParserResult.fromError(result.error());
+                    ? ParserResult.fromValue(successMapper.apply(result.value()))
+                    : ParserResult.fromError(result.error());
             }
         };
     }
@@ -82,6 +84,10 @@ public abstract class Parser<T> {
 
     public final Parser<List<T>> manyUntilEnd() {
         return new ManyUntilEndParser<>(this);
+    }
+
+    public final Parser<List<T>> manyWithDelimiter(Parser<?> delimiter) {
+        return new ManyWithDelimiterParser<>(this, delimiter);
     }
 
     public final Parser<T> recover(Parser<T> recoveryParser, @Nullable Report.Kind overrideReportKind) {
@@ -117,11 +123,23 @@ public abstract class Parser<T> {
         return recover(Parse.success(defaultValue), overrideReportKind);
     }
 
+    public final Parser<T> recover(Supplier<T> defaultValueSupplier, @Nullable Report.Kind overrideReportKind) {
+        return recover(Parse.success(defaultValueSupplier), overrideReportKind);
+    }
+
+    public final Parser<T> recover(Supplier<T> defaultValueSupplier) {
+        return recover(defaultValueSupplier, null);
+    }
+
     public final Parser<T> recover(T defaultValue) {
         return recover(defaultValue, null);
     }
 
+    public final Parser<T> followedBy(Parser<?> nextParser) {
+        return then(result -> nextParser.map(result::value));
+    }
+
     public final Parser<T> between(Parser<?> leftSideParser, Parser<?> rightSideParser) {
-        return leftSideParser.then(this.then(result -> rightSideParser.map(() -> result.value())));
+        return leftSideParser.then(then(result -> rightSideParser.map(result::value)));
     }
 }

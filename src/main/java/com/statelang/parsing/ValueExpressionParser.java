@@ -7,12 +7,13 @@ import com.statelang.model.UnaryOperator;
 import com.statelang.parsing.lib.*;
 import com.statelang.tokenization.Token;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import static com.statelang.tokenization.Token.Kind.*;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ValueExpressionParser {
-    private ValueExpressionParser() {
-    }
-
     public static final Parser<NumberLiteralValue> numberLiteral = Parse.token(LITERAL_NUMBER).map(
         token -> new NumberLiteralValue(token, Double.parseDouble(token.text()))
     );
