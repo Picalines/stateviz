@@ -3,8 +3,10 @@ package com.statelang.tokenization;
 import java.util.regex.Pattern;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 
+@RequiredArgsConstructor
 @Accessors(fluent = true)
 public final class Token {
 
@@ -13,7 +15,6 @@ public final class Token {
 		COMMENT("comment", "#.*\\n?", true),
 
 		SEMICOLON("';'", ";"),
-		COLON("':'", ":"),
 		COMMA("','", ","),
 		DOT("'.'", "\\."),
 		AT("'@'", "@"),
@@ -82,22 +83,9 @@ public final class Token {
 	@Getter
 	private final String text;
 
-	private final SourceText sourceText;
-
-	Token(SourceText sourceText, SourceLocation startLocation, int sourceIndex, int length, Kind kind) {
-		this.sourceText = sourceText;
-		this.kind = kind;
-
-		text = sourceText.text().substring(sourceIndex, sourceIndex + length);
-
-		this.selection = new SourceSelection(startLocation,
-				startLocation.movedTrough(text.substring(0, text.length() - 1)));
-	}
-
 	@Override
 	public String toString() {
 		final var oneLineValue = text().replace("\n", "\\n");
-		final var sourceDesc = sourceText.sourceDescriptor();
-		return "Token(" + kind + " '" + oneLineValue + "' in " + sourceDesc + " at {" + selection + "})";
+		return "Token(" + kind + " '" + oneLineValue + "' at {" + selection + "})";
 	}
 }

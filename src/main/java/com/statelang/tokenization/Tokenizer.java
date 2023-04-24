@@ -32,15 +32,19 @@ final class Tokenizer implements Iterator<Token> {
 			throw new NoSuchElementException();
 		}
 
-		for (final var tokenKind : Token.Kind.values()) {
-			final var matcher = tokenKind.regex().matcher(sourceText.text());
+		for (var tokenKind : Token.Kind.values()) {
+			var matcher = tokenKind.regex().matcher(sourceText.text());
 
 			if (!matcher.find(index) || matcher.start() != index) {
 				continue;
 			}
 
-			final var tokenLength = matcher.end() - matcher.start();
-			final var token = new Token(sourceText, location, index, tokenLength, tokenKind);
+			var tokenLength = matcher.end() - matcher.start();
+			var tokenText = sourceText.text().substring(index, index + tokenLength);
+			var tokenSelection = new SourceSelection(
+				location, location.movedTrough(tokenText.substring(0, tokenText.length() - 1))
+			);
+			var token = new Token(tokenSelection, tokenKind, tokenText);
 
 			index += tokenLength;
 
@@ -49,9 +53,11 @@ final class Tokenizer implements Iterator<Token> {
 			return token;
 		}
 
-		reporter.report(Report.builder()
+		reporter.report(
+			Report.builder()
 				.selection(location.toCharSelection())
-				.kind(Report.Kind.INVALID_TOKEN));
+				.kind(Report.Kind.INVALID_TOKEN)
+		);
 
 		location = location.movedTrough(Character.toString(sourceText.text().charAt(index)));
 		index++;
