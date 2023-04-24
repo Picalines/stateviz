@@ -17,7 +17,7 @@ public final class ConstantDefinitionParser {
         .then(
             nameToken -> Parse.token(OPERATOR_ASSIGN)
                 .then(ValueExpressionParser.lambda)
-                .followedBy(Parse.token(SEMICOLON))
+                .followedBy(Parse.token(SEMICOLON).recover(() -> null))
                 .map(initialValue -> new ConstantDefinition(nameToken.value(), initialValue))
         );
 }
