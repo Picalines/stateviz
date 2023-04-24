@@ -13,10 +13,10 @@ import lombok.experimental.Accessors;
 public final class UnaryValueExpressionNode extends ValueExpressionNode {
 
     @Getter
-    private final ValueExpressionNode right;
+    private final UnaryOperator operator;
 
     @Getter
-    private final UnaryOperator operator;
+    private final ValueExpressionNode right;
 
     @Getter
     private final Token operatorToken;
