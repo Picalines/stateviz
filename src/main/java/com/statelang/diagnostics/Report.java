@@ -31,7 +31,8 @@ public final class Report {
 		UNEXPECTED_END_OF_INPUT(Severity.ERROR),
 		END_OF_INPUT_EXPECTED(Severity.ERROR),
 
-		VALUE_EXPRESSION_EXPECTED(Severity.ERROR);
+		VALUE_EXPRESSION_EXPECTED(Severity.ERROR),
+		CONDITION_EXPECTED(Severity.ERROR);
 
 		@Getter
 		private final Severity severity;

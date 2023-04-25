@@ -35,14 +35,14 @@ public final class TokenReader {
 
     public Token currentToken() {
         return currentToken != null
-                ? currentToken.value
-                : null;
+            ? currentToken.value
+            : null;
     }
 
     public SourceSelection selection() {
         return currentToken != null
-                ? currentToken.value.selection()
-                : SourceSelection.FIRST_CHARACTER;
+            ? currentToken.value.selection()
+            : SourceSelection.FIRST_CHARACTER;
     }
 
     public SourceLocation location() {
@@ -73,22 +73,24 @@ public final class TokenReader {
     public TokenBookmark createBookmark() {
         Preconditions.checkState(currentToken != null, "cannot create bookmark at end");
 
-        return new TokenBookmark(this, location(), currentToken, bookmarks);
+        return new TokenBookmark(this, currentToken, bookmarks);
     }
 
     public void backtrackTo(TokenBookmark bookmark) {
-        Preconditions.checkArgument(bookmark.reader() == this,
-                "provided TokenBookmark was created by another TokenReader");
+        Preconditions.checkArgument(
+            bookmark.reader() == this,
+            "provided TokenBookmark was created by another TokenReader"
+        );
 
         currentToken = bookmark.tokenNode();
-        atEnd = false;
+        atEnd = bookmark.atEnd();
     }
 
     private void clearUnreachableTokens() {
         var tokenNode = cachedTokens.first();
         var firstMarkedToken = Optional.ofNullable(bookmarks.first())
-                .map(mark -> mark.value.tokenNode())
-                .orElse(null);
+            .map(mark -> mark.value.tokenNode())
+            .orElse(null);
 
         while (tokenNode != null && tokenNode != currentToken && tokenNode != firstMarkedToken) {
             tokenNode = tokenNode.next();

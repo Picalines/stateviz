@@ -72,7 +72,8 @@ class ParseTests {
 
     @Test
     void oneOf() {
-        var tokenKinds = new Token.Kind[] { Token.Kind.KEYWORD_STATE, Token.Kind.KEYWORD_LET, Token.Kind.KEYWORD_CONST };
+        var tokenKinds = new Token.Kind[] { Token.Kind.KEYWORD_STATE, Token.Kind.KEYWORD_LET,
+            Token.Kind.KEYWORD_CONST };
         var tokens = new String[] { "state", "let", "const" };
 
         @SuppressWarnings("unchecked")
@@ -93,8 +94,10 @@ class ParseTests {
 
     @Test
     void recursive() {
-        var parser = Parse.<String>recursive(recursion -> Parse.token(Token.Kind.LITERAL_NUMBER).then(recursion)
-                .or(Parse.token(Token.Kind.DOT).map(() -> "success")));
+        var parser = Parse.<String>recursive(
+            recursion -> Parse.token(Token.Kind.LITERAL_NUMBER).then(recursion)
+                .or(Parse.token(Token.Kind.DOT).map(() -> "success"))
+        );
 
         var result = assertParsesWithoutErrors("1 2 3 .", parser);
         assertEquals("success", result);
@@ -119,7 +122,7 @@ class ParseTests {
         }
 
         var termParser = Parse.token(Token.Kind.LITERAL_NUMBER)
-                .map(token -> (Term) new TokenTerm(token));
+            .map(token -> (Term) new TokenTerm(token));
 
         var operatorParser = Parse.token(Token.Kind.OPERATOR_PLUS);
 
@@ -132,10 +135,15 @@ class ParseTests {
 
     @Test
     void optional() {
-        var parser = Parse.optional(Parse.token(Token.Kind.OPERATOR_MINUS).as(-1)).or(Parse.success(1))
-                .then(sign -> Parse.token(Token.Kind.LITERAL_NUMBER)
-                        .map(token -> Double.valueOf(token.text()))
-                        .map(num -> sign.value() * num));
+        var parser = Parse.optional(
+            Parse.token(Token.Kind.OPERATOR_MINUS).as(-1)
+        )
+            .or(Parse.success(1))
+            .then(
+                sign -> Parse.token(Token.Kind.LITERAL_NUMBER)
+                    .map(token -> Double.valueOf(token.text()))
+                    .map(num -> sign.value() * num)
+            );
 
         assertEquals(-1.25, assertParsesWithoutErrors("-1.25", parser));
         assertEquals(1.25, assertParsesWithoutErrors("1.25", parser));
@@ -144,7 +152,7 @@ class ParseTests {
     @Test
     void skipUntil() {
         var parser = Parse.skipUntil(Parse.token(Token.Kind.SEMICOLON))
-                .map(() -> "success");
+            .map(() -> "success");
 
         assertEquals("success", assertParsesWithoutErrors("1 2 3 4 5 ;", parser));
         assertParsesWithErrors("1 2 3 4 5", parser);

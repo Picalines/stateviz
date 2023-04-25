@@ -1,11 +1,21 @@
 package com.statelang.tokenization;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
+
+@Accessors(fluent = true)
 public final class TokenBookmark implements AutoCloseable {
+    @Getter
     private final TokenReader reader;
 
+    @Getter
     private final SourceLocation location;
 
+    @Getter
     private final LinkedNodeList<Token>.Node tokenNode;
+
+    @Getter
+    private final boolean atEnd;
 
     private final LinkedNodeList<TokenBookmark>.Node bookmarkNode;
 
@@ -14,13 +24,13 @@ public final class TokenBookmark implements AutoCloseable {
     private boolean discarded = false;
 
     TokenBookmark(
-            TokenReader reader,
-            SourceLocation location,
-            LinkedNodeList<Token>.Node tokenNode,
-            LinkedNodeList<TokenBookmark> bookmarkList) {
+        TokenReader reader,
+        LinkedNodeList<Token>.Node tokenNode,
+        LinkedNodeList<TokenBookmark> bookmarkList) {
         this.reader = reader;
-        this.location = location;
+        this.location = reader.location();
         this.tokenNode = tokenNode;
+        atEnd = reader.atEnd();
 
         this.bookmarkList = bookmarkList;
 
@@ -32,16 +42,8 @@ public final class TokenBookmark implements AutoCloseable {
         }
 
         this.bookmarkNode = nextBookmark != null
-                ? bookmarkList.addBefore(nextBookmark, this)
-                : bookmarkList.addLast(this);
-    }
-
-    TokenReader reader() {
-        return reader;
-    }
-
-    LinkedNodeList<Token>.Node tokenNode() {
-        return tokenNode;
+            ? bookmarkList.addBefore(nextBookmark, this)
+            : bookmarkList.addLast(this);
     }
 
     public void discard() {

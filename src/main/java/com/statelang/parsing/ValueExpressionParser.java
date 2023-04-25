@@ -43,9 +43,7 @@ public final class ValueExpressionParser {
             variable,
             innerExpression
         )
-            .recover(
-                Parse.success(InvalidValueNode.instance), Report.Kind.VALUE_EXPRESSION_EXPECTED
-            );
+            .recover(InvalidValueNode.instance);
 
         record TokenOperatorPair(Token token, UnaryOperator operator) {
         }
@@ -129,6 +127,7 @@ public final class ValueExpressionParser {
             and,
             Parse.token(OPERATOR_OR).as(BinaryOperator.OR),
             BinaryValueExpressionNode::new
-        );
+        )
+            .withError(Report.Kind.VALUE_EXPRESSION_EXPECTED);
     }
 }
