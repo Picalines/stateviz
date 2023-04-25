@@ -1,6 +1,5 @@
 package com.statelang.parsing;
 
-import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithErrors;
 import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithoutErrors;
 import static org.assertj.core.api.Assertions.assertThat;
 
