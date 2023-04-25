@@ -1,5 +1,6 @@
 package com.statelang.parsing.lib;
 
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -55,6 +56,24 @@ public final class Parse {
         };
     }
 
+    public static <T> Parser<T> ref(Supplier<Parser<T>> parserSupplier) {
+        Preconditions.checkArgument(parserSupplier != null, "parserSupplier is null");
+
+        return new Parser<T>() {
+            private Parser<T> suppliedParser = null;
+
+            @Override
+            public ParserResult<T> parse(ParserContext context) {
+                if (suppliedParser == null) {
+                    suppliedParser = parserSupplier.get();
+                    Objects.requireNonNull(suppliedParser);
+                }
+
+                return suppliedParser.parse(context);
+            }
+        };
+    }
+
     public static <T> Parser<T> recursive(Function<Parser<T>, Parser<T>> recursiveParserCreator) {
         Preconditions.checkArgument(recursiveParserCreator != null, "recursiveParserCreator is null");
 
@@ -73,10 +92,10 @@ public final class Parse {
     }
 
     public static <TTerm, TOperator> Parser<TTerm> chain(
-            Parser<TTerm> firstTermParser,
-            Parser<TTerm> restTermsParser,
-            Parser<TOperator> operatorParser,
-            ChainOperatorApplier<TOperator, TTerm> apply) {
+        Parser<TTerm> firstTermParser,
+        Parser<TTerm> restTermsParser,
+        Parser<TOperator> operatorParser,
+        ChainOperatorApplier<TOperator, TTerm> apply) {
         Preconditions.checkArgument(firstTermParser != null, "firstTermParser is null");
         Preconditions.checkArgument(restTermsParser != null, "restTermsParser is null");
         Preconditions.checkArgument(operatorParser != null, "operatorParser is null");
@@ -86,9 +105,9 @@ public final class Parse {
     }
 
     public static <TTerm, TOperator> Parser<TTerm> chain(
-            Parser<TTerm> termParser,
-            Parser<TOperator> operatorParser,
-            ChainOperatorApplier<TOperator, TTerm> apply) {
+        Parser<TTerm> termParser,
+        Parser<TOperator> operatorParser,
+        ChainOperatorApplier<TOperator, TTerm> apply) {
         return chain(termParser, termParser, operatorParser, apply);
     }
 

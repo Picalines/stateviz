@@ -82,8 +82,8 @@ public abstract class Parser<T> {
         return new ManyParser<>(this);
     }
 
-    public final Parser<List<T>> manyUntilEnd() {
-        return new ManyUntilEndParser<>(this);
+    public final Parser<List<T>> manyUntil(Parser<?> endParser) {
+        return new ManyUntilParser<>(this, endParser);
     }
 
     public final Parser<List<T>> manyWithDelimiter(Parser<?> delimiter) {

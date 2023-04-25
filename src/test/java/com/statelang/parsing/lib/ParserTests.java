@@ -78,17 +78,6 @@ class ParserTests {
     }
 
     @Test
-    void manyUntilEnd() {
-        var numberParser = Parse.token(Token.Kind.LITERAL_NUMBER)
-                .map(token -> Double.valueOf(token.text()));
-
-        var parser = numberParser.manyUntilEnd();
-
-        assertIterableEquals(Arrays.asList(1.0, 2.0, 3.0), assertParsesWithoutErrors("1 2 3", parser));
-        assertParsesWithErrors("1 2 3 x", parser);
-    }
-
-    @Test
     void recover() {
         var parser = Parse.token(Token.Kind.KEYWORD_LET)
                 .then(Parse.token(Token.Kind.IDENTIFIER))

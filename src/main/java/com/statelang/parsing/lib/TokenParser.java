@@ -29,17 +29,24 @@ final class TokenParser extends Parser<Token> {
         var reader = context.reader();
 
         if (reader.atEnd()) {
-            return ParserResult.fromError(Report.builder()
+            return ParserResult.fromError(
+                Report.builder()
                     .selection(reader.selection())
                     .kind(Report.Kind.UNEXPECTED_END_OF_INPUT)
-                    .expectedTokenKinds(expectedTokenKinds));
+                    .expectedTokenKinds(expectedTokenKinds)
+            );
         }
 
-        if (reader.currentToken().kind() != tokenKind) {
-            return ParserResult.fromError(Report.builder()
+        var actualTokenKind = reader.currentToken().kind();
+
+        if (actualTokenKind != tokenKind) {
+            return ParserResult.fromError(
+                Report.builder()
                     .selection(reader.selection())
                     .kind(Report.Kind.UNEXPECTED_TOKEN)
-                    .expectedTokenKinds(expectedTokenKinds));
+                    .expectedTokenKinds(expectedTokenKinds)
+                    .unexpectedTokenKind(actualTokenKind)
+            );
         }
 
         var result = ParserResult.fromValue(reader.currentToken());

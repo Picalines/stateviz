@@ -72,6 +72,11 @@ public final class Token {
 		private Kind(String description, String regex) {
 			this(description, regex, false);
 		}
+
+		@Override
+		public String toString() {
+			return description;
+		}
 	}
 
 	@Getter

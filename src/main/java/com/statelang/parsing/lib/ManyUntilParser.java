@@ -6,9 +6,11 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-final class ManyUntilEndParser<T> extends Parser<List<T>> {
+final class ManyUntilParser<T> extends Parser<List<T>> {
 
     private final Parser<T> elementParser;
+
+    private final Parser<?> endParser;
 
     @Override
     public ParserResult<List<T>> parse(ParserContext context) {
@@ -18,15 +20,20 @@ final class ManyUntilEndParser<T> extends Parser<List<T>> {
 
         while (true) {
             var beforeElementLocation = reader.location();
+
+            var endResult = endParser.parse(context);
+            if (endResult.isSuccess()) {
+                break;
+            }
+
+            if (!endResult.error().location().equals(beforeElementLocation)) {
+                return ParserResult.fromError(endResult.error());
+            }
+
             var elementResult = elementParser.parse(context);
 
             if (!elementResult.isSuccess()) {
-                var error = elementResult.error();
-                if (error.location().equals(beforeElementLocation) && context.reader().atEnd()) {
-                    break;
-                }
-
-                return ParserResult.fromError(error);
+                return ParserResult.fromError(elementResult.error());
             }
 
             elements.add(elementResult.value());
