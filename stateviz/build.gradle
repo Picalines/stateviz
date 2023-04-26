@@ -1,0 +1,41 @@
+plugins {
+    id 'application'
+    id 'org.springframework.boot' version '3.0.6'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.stateviz'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+java.sourceCompatibility = JavaVersion.VERSION_17
+
+repositories {
+    mavenCentral()
+}
+
+application {
+    mainClass.set('com.stateviz.StatevizApplication')
+}
+
+dependencies {
+    implementation project(':statelang')
+
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+	annotationProcessor 'org.projectlombok:lombok:1.18.26'
+
+	testCompileOnly 'org.projectlombok:lombok:1.18.26'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.26'
+
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework:spring-web'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    implementation 'com.google.guava:guava:31.1-jre'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.assertj:assertj-core:3.23.1'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
