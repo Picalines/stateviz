@@ -1,5 +1,6 @@
 package com.statelang.parsing.lib;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -34,6 +35,22 @@ public final class Parse {
     public static Parser<Token> token(Token.Kind tokenKind) {
         Preconditions.checkArgument(tokenKind != null, "tokenKind is null");
         return TokenParser.of(tokenKind);
+    }
+
+    public static Parser<Token> token(Token.Kind... possibleTokenKinds) {
+        Preconditions.checkArgument(possibleTokenKinds != null, "possibleTokenKinds is null");
+        Preconditions.checkArgument(possibleTokenKinds.length >= 1, "possibleTokenKinds.length < 1");
+
+        if (possibleTokenKinds.length == 1) {
+            return token(possibleTokenKinds[0]);
+        }
+
+        @SuppressWarnings("unchecked")
+        var tokenParsers = (Parser<Token>[]) Arrays.stream(possibleTokenKinds)
+            .map(kind -> token(kind))
+            .toArray(Parser[]::new);
+
+        return oneOf(tokenParsers);
     }
 
     @SafeVarargs

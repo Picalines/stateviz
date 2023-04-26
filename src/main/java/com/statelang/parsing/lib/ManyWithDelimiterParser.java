@@ -18,14 +18,14 @@ final class ManyWithDelimiterParser<T> extends Parser<List<T>> {
 
         List<T> elements = new LinkedList<>();
 
-        while (true) {
+        while (!reader.atEnd()) {
             var beforeElementLocation = reader.location();
             var elementResult = elementParser.parse(context);
 
             if (!elementResult.isSuccess()) {
                 var error = elementResult.error();
 
-                if (error.location().equals(beforeElementLocation) || reader.atEnd()) {
+                if (error.location().equals(beforeElementLocation)) {
                     break;
                 }
 
