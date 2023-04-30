@@ -2,6 +2,7 @@ package com.statelang.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -42,19 +43,19 @@ public abstract class InstanceType<T> {
         builtLibrary = true;
     }
 
-    public final InstanceUnaryOperator<T, ?> getOperator(UnaryOperator operator) {
-        return unaryOperators.get(operator);
+    public final Optional<InstanceUnaryOperator<T, ?>> getOperator(UnaryOperator operator) {
+        return Optional.ofNullable(unaryOperators.get(operator));
     }
 
-    public final <U> InstanceBinaryOperator<T, U, ?> getOperator(BinaryOperator operator, InstanceType<U> rightType) {
+    public final <U> Optional<InstanceBinaryOperator<T, U, ?>> getOperator(BinaryOperator operator, InstanceType<U> rightType) {
         var key = new BinaryOperatorKey(operator, rightType);
         if (!binaryOperators.containsKey(key)) {
-            return null;
+            return Optional.empty();
         }
 
         @SuppressWarnings("unchecked")
         var instanceOperator = (InstanceBinaryOperator<T, U, ?>) binaryOperators.get(key);
-        return instanceOperator;
+        return Optional.of(instanceOperator);
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)

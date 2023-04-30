@@ -14,6 +14,8 @@ public abstract class LiteralValueNode extends ValueExpressionNode {
     @Getter
     private final Token token;
 
+    public abstract Object value();
+
     @Override
     public final SourceSelection selection() {
         return token.selection();

@@ -43,7 +43,10 @@ class ProgramParserTests {
             .isEqualTo(
                 new Program(
                     Arrays.asList(
-                        new StateDefinition(Arrays.asList("COUNTING", "STOPPED")),
+                        new StateDefinition(
+                            Arrays.asList("COUNTING", "STOPPED"),
+                            new Token(null, KEYWORD_STATE, "state")
+                        ),
                         new ConstantDefinition(
                             new Token(null, IDENTIFIER, "max"),
                             new NumberLiteralValue(new Token(null, LITERAL_NUMBER, "10"), 10)

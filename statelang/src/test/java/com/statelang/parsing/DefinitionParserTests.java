@@ -17,6 +17,7 @@ import com.statelang.ast.NumberLiteralValue;
 import com.statelang.ast.StateActionBlock;
 import com.statelang.ast.StateDefinition;
 import com.statelang.ast.VariableDefinition;
+import com.statelang.tokenization.SourceLocation;
 import com.statelang.tokenization.SourceSelection;
 import com.statelang.tokenization.SourceText;
 import com.statelang.tokenization.Token;
@@ -125,7 +126,14 @@ class DefinitionParserTests {
             assertThat(assertParsesWithoutErrors("state {}", DefinitionParser.state))
                 .usingRecursiveComparison()
                 .isEqualTo(
-                    new StateDefinition(Arrays.asList())
+                    new StateDefinition(
+                        Arrays.asList(),
+                        new Token(
+                            new SourceSelection(new SourceLocation(1, 1), new SourceLocation(1, 5)),
+                            Token.Kind.KEYWORD_STATE,
+                            "state"
+                        )
+                    )
                 );
         }
 
@@ -133,8 +141,9 @@ class DefinitionParserTests {
         void singleState() {
             assertThat(assertParsesWithoutErrors("state { SINGLE }", DefinitionParser.state))
                 .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(Token.class)
                 .isEqualTo(
-                    new StateDefinition(Arrays.asList("SINGLE"))
+                    new StateDefinition(Arrays.asList("SINGLE"), null)
                 );
         }
 
@@ -142,20 +151,23 @@ class DefinitionParserTests {
         void manyStates() {
             assertThat(assertParsesWithoutErrors("state { A, B }", DefinitionParser.state))
                 .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(Token.class)
                 .isEqualTo(
-                    new StateDefinition(Arrays.asList("A", "B"))
+                    new StateDefinition(Arrays.asList("A", "B"), null)
                 );
 
             assertThat(assertParsesWithoutErrors("state { A, B, C }", DefinitionParser.state))
                 .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(Token.class)
                 .isEqualTo(
-                    new StateDefinition(Arrays.asList("A", "B", "C"))
+                    new StateDefinition(Arrays.asList("A", "B", "C"), null)
                 );
 
             assertThat(assertParsesWithoutErrors("state { A, B, C, }", DefinitionParser.state))
                 .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(Token.class)
                 .isEqualTo(
-                    new StateDefinition(Arrays.asList("A", "B", "C"))
+                    new StateDefinition(Arrays.asList("A", "B", "C"), null)
                 );
         }
     }

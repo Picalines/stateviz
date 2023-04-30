@@ -32,7 +32,16 @@ public final class Report {
 		END_OF_INPUT_EXPECTED(Severity.ERROR),
 
 		VALUE_EXPRESSION_EXPECTED(Severity.ERROR),
-		CONDITION_EXPECTED(Severity.ERROR);
+		CONDITION_EXPECTED(Severity.ERROR),
+		
+		AMBIGUOUS_DEFINITION(Severity.ERROR),
+		MISSING_STATE_DEFINITION(Severity.ERROR),
+		TOO_LITTLE_STATES(Severity.ERROR),
+		
+		DUPLICATE_IDENTIFIER(Severity.ERROR),
+		
+		UNDEFINED_OPERATOR(Severity.ERROR),
+		UNDEFINED_VARIABLE(Severity.ERROR);
 
 		@Getter
 		private final Severity severity;

@@ -72,6 +72,10 @@ public final class StateMachine {
             return this;
         }
 
+        public boolean hasDefinedStates() {
+            return !states.isEmpty();
+        }
+
         @SuppressWarnings("unused")
         private StateMachineBuilder transitions(Map<String, Set<String>> transitions) {
             this.transitions = transitions;

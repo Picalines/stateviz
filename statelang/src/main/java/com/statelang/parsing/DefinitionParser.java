@@ -36,10 +36,10 @@ public final class DefinitionParser {
 
     public static final Parser<StateDefinition> state = Parse.token(KEYWORD_STATE)
         .then(
-            Parse.token(IDENTIFIER)
+            stateKeyword -> Parse.token(IDENTIFIER)
                 .map(Token::text)
                 .manyWithDelimiter(Parse.token(COMMA))
-                .map(StateDefinition::new)
+                .map(states -> new StateDefinition(states, stateKeyword.value()))
                 .between(Parse.token(OPEN_CURLY_BRACE), Parse.token(CLOSE_CURLY_BRACE))
         );
 
