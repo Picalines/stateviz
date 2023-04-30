@@ -26,8 +26,7 @@ public abstract class InstanceType<T> {
 
     private boolean builtLibrary = false;
 
-    private record BinaryOperatorKey(BinaryOperator operator, InstanceType<?> rightType) {
-    }
+    private record BinaryOperatorKey(BinaryOperator operator, InstanceType<?> rightType) {}
 
     private final Map<UnaryOperator, InstanceUnaryOperator<T, ?>> unaryOperators = new HashMap<>();
 
@@ -78,7 +77,11 @@ public abstract class InstanceType<T> {
         }
 
         public <U, R> void operator(
-            BinaryOperator operator, InstanceType<U> rightType, InstanceType<R> returnType, BiFunction<T, U, R> apply) {
+            BinaryOperator operator,
+            InstanceType<U> rightType,
+            InstanceType<R> returnType,
+            BiFunction<T, U, R> apply)
+        {
             var key = new BinaryOperatorKey(operator, rightType);
 
             Preconditions.checkState(
