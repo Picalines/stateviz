@@ -41,7 +41,15 @@ public final class Report {
 		DUPLICATE_IDENTIFIER(Severity.ERROR),
 		
 		UNDEFINED_OPERATOR(Severity.ERROR),
-		UNDEFINED_VARIABLE(Severity.ERROR);
+		UNDEFINED_VARIABLE(Severity.ERROR),
+		UNDEFINED_STATE(Severity.ERROR),
+		
+		CONSTANT_ASSIGNMENT(Severity.ERROR),
+		
+		TYPE_ERROR(Severity.ERROR),
+		
+		UNREACHABLE_CODE(Severity.WARNING),
+		UNREACHABLE_STATE(Severity.ERROR);
 
 		@Getter
 		private final Severity severity;

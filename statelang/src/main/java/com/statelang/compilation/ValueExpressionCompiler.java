@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import com.statelang.ast.*;
 import com.statelang.diagnostics.Report;
-import com.statelang.diagnostics.Reporter;
+import com.statelang.interpretation.InterpretationAction;
 import com.statelang.model.*;
 
 import lombok.AccessLevel;
@@ -16,23 +16,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class ValueExpressionCompiler {
 
-    public static CompiledExpression compile(CompilationContext context, ValueExpressionNode expressionNode) {
-        var reporter = context.reporter();
-
+    public static InstanceType<?> compile(CompilationContext context, ValueExpressionNode expressionNode) {
         if (expressionNode instanceof LiteralValueNode literal) {
-            return compileLiteralNode(literal);
+            return compileLiteralNode(context, literal);
         }
 
         if (expressionNode instanceof VariableValueNode variable) {
-            return compileVariableNode(context, reporter, variable);
+            return compileVariableNode(context, variable);
         }
 
         if (expressionNode instanceof UnaryValueExpressionNode unaryExpression) {
-            return compileUnaryExpression(context, reporter, unaryExpression);
+            return compileUnaryExpression(context, unaryExpression);
         }
 
         if (expressionNode instanceof BinaryValueExpressionNode binaryExpression) {
-            return compileBinaryExpression(context, reporter, binaryExpression);
+            return compileBinaryExpression(context, binaryExpression);
         }
 
         throw new UnsupportedOperationException(
@@ -40,75 +38,78 @@ final class ValueExpressionCompiler {
         );
     }
 
-    private static CompiledExpression compileBinaryExpression(CompilationContext context, Reporter reporter,
+    private static InstanceType<?> compileBinaryExpression(
+        CompilationContext context,
         BinaryValueExpressionNode binaryExpression)
     {
-        var left = compile(context, binaryExpression.left());
-        var right = compile(context, binaryExpression.right());
-        if (left.type() == InvalidInstanceType.INSTANCE || right.type() == InvalidInstanceType.INSTANCE) {
-            return left;
+        var leftType = compile(context, binaryExpression.left());
+        var rightType = compile(context, binaryExpression.right());
+        if (leftType == InvalidInstanceType.INSTANCE || rightType == InvalidInstanceType.INSTANCE) {
+            return leftType;
         }
 
-        var evalLeft = left.action();
-        var evalRight = right.action();
-
-        var instanceOperator = left.type().getOperator(binaryExpression.operator(), right.type());
+        var instanceOperator = leftType.getOperator(binaryExpression.operator(), rightType).orElse(null);
         var expressionSelection = binaryExpression.selection();
 
-        return instanceOperator
-            .map(operator -> new CompiledExpression(right.type(), evalLeft.andThen(evalRight).andThen(c -> {
-                var rightValue = c.stack().pop();
-                var leftValue = c.stack().pop();
+        if (instanceOperator == null) {
+            context.reporter().report(
+                Report.builder()
+                    .kind(Report.Kind.UNDEFINED_OPERATOR)
+                    .selection(expressionSelection)
+            );
 
-                @SuppressWarnings("unchecked")
-                var applyOperator = (BiFunction<Object, Object, Object>) operator.apply();
-
-                c.stack().add(applyOperator.apply(leftValue, rightValue));
-            })))
-            .orElseGet(() -> {
-                reporter.report(
-                    Report.builder()
-                        .kind(Report.Kind.UNDEFINED_OPERATOR)
-                        .selection(expressionSelection)
-                );
-
-                return CompiledExpression.INVALID;
-            });
-    }
-
-    private static CompiledExpression compileUnaryExpression(CompilationContext context, Reporter reporter,
-        UnaryValueExpressionNode unaryExpression)
-    {
-        var right = compile(context, unaryExpression.right());
-        if (right.type() == InvalidInstanceType.INSTANCE) {
-            return right;
+            return InvalidInstanceType.INSTANCE;
         }
 
-        var evalRight = right.action();
-        var instanceOperator = right.type().getOperator(unaryExpression.operator());
-        var operatorToken = unaryExpression.operatorToken();
+        context.interpreterBuilder().stateAction(new InterpretationAction(c -> {
+            var rightValue = c.stack().pop();
+            var leftValue = c.stack().pop();
 
-        return instanceOperator
-            .map(operator -> new CompiledExpression(right.type(), evalRight.andThen(c -> {
-                var rightValue = c.stack().pop();
+            @SuppressWarnings("unchecked")
+            var applyOperator = (BiFunction<Object, Object, Object>) instanceOperator.apply();
 
-                @SuppressWarnings("unchecked")
-                var applyOperator = (Function<Object, Object>) operator.apply();
+            c.stack().add(applyOperator.apply(leftValue, rightValue));
+        }));
 
-                c.stack().add(applyOperator.apply(rightValue));
-            })))
-            .orElseGet(() -> {
-                reporter.report(
-                    Report.builder()
-                        .kind(Report.Kind.UNDEFINED_OPERATOR)
-                        .selection(operatorToken.selection())
-                );
-
-                return CompiledExpression.INVALID;
-            });
+        return instanceOperator.returnType();
     }
 
-    private static CompiledExpression compileVariableNode(CompilationContext context, Reporter reporter,
+    private static InstanceType<?> compileUnaryExpression(
+        CompilationContext context,
+        UnaryValueExpressionNode unaryExpression)
+    {
+        var rightType = compile(context, unaryExpression.right());
+        if (rightType == InvalidInstanceType.INSTANCE) {
+            return rightType;
+        }
+
+        var instanceOperator = rightType.getOperator(unaryExpression.operator()).orElse(null);
+        var expressionSelection = unaryExpression.selection();
+
+        if (instanceOperator == null) {
+            context.reporter().report(
+                Report.builder()
+                    .kind(Report.Kind.UNDEFINED_OPERATOR)
+                    .selection(expressionSelection)
+            );
+
+            return InvalidInstanceType.INSTANCE;
+        }
+
+        context.interpreterBuilder().stateAction(new InterpretationAction(c -> {
+            var rightValue = c.stack().pop();
+
+            @SuppressWarnings("unchecked")
+            var applyOperator = (Function<Object, Object>) instanceOperator.apply();
+
+            c.stack().add(applyOperator.apply(rightValue));
+        }));
+
+        return instanceOperator.returnType();
+    }
+
+    private static InstanceType<?> compileVariableNode(
+        CompilationContext context,
         VariableValueNode variable)
     {
         var variableName = variable.identifier();
@@ -124,16 +125,20 @@ final class ValueExpressionCompiler {
             var constantType = (InstanceType<Object>) context.constants().get(variableName);
             type = constantType;
         } else {
-            reporter.report(
+            context.reporter().report(
                 Report.builder()
                     .kind(Report.Kind.UNDEFINED_VARIABLE)
                     .selection(variable.selection())
             );
 
-            return CompiledExpression.INVALID;
+            return InvalidInstanceType.INSTANCE;
         }
 
-        return new CompiledExpression(type, c -> c.stack().add(c.namedValues().get(variableName)));
+        context.interpreterBuilder().stateAction(new InterpretationAction(c -> {
+            c.stack().add(c.namedValues().get(variableName));
+        }));
+
+        return type;
     }
 
     private static final Map<Class<?>, InstanceType<?>> literalInstanceTypeMap = new HashMap<>() {
@@ -144,7 +149,7 @@ final class ValueExpressionCompiler {
         }
     };
 
-    private static CompiledExpression compileLiteralNode(LiteralValueNode literal) {
+    private static InstanceType<?> compileLiteralNode(CompilationContext context, LiteralValueNode literal) {
         var type = literalInstanceTypeMap.get(literal.getClass());
 
         if (type == null) {
@@ -154,6 +159,11 @@ final class ValueExpressionCompiler {
         }
 
         var value = literal.value();
-        return new CompiledExpression(type, c -> c.stack().push(value));
+
+        context.interpreterBuilder().stateAction(new InterpretationAction(c -> {
+            c.stack().push(value);
+        }));
+
+        return type;
     }
 }

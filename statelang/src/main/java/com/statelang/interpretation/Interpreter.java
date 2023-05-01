@@ -2,11 +2,12 @@ package com.statelang.interpretation;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.statelang.model.StateMachine;
+import com.statelang.tokenization.SourceLocation;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -14,62 +15,87 @@ import lombok.Singular;
 
 public final class Interpreter {
 
+    public static final String EXIT_LABEL = "$exit$";
+
+    public static final String SELECT_BRANCH_LABEL = "$select_branch$";
+
     @Getter
     private final StateMachine stateMachine;
 
-    private final Iterator<InterpretationAction> initActions;
+    private final List<InterpretationAction> stateActions;
 
-    private final Map<String, InterpretationAction> stateActions;
+    private final Map<String, Integer> labels;
 
     private final InterpretationContext context;
+
+    private int currentAction = 0;
+
+    private InterpreterExitReason exitReason = null;
 
     @Builder
     public Interpreter(
         StateMachine stateMachine,
-        @Singular List<InterpretationAction> initActions,
-        Map<String, InterpretationAction> stateActions)
+        @Singular List<InterpretationAction> stateActions)
     {
         this.stateMachine = stateMachine;
-        this.initActions = initActions.iterator();
-        this.stateActions = Collections.unmodifiableMap(stateActions);
+        this.stateActions = Collections.unmodifiableList(stateActions);
 
-        context = new InterpretationContext(stateMachine);
+        labels = new HashMap<>();
+        int i = 0;
+        for (var action : stateActions) {
+            var label = action.label();
+            if (label != null) {
+                labels.put(label, i);
+            }
+            i++;
+        }
+
+        context = new InterpretationContext(stateMachine::state);
     }
 
-    public boolean tryStep() {
-        if (context.stopped()) {
-            return false;
+    public Optional<InterpreterExitReason> tryStep() {
+        if (exitReason != null) {
+            return Optional.of(exitReason);
         }
 
-        if (initActions.hasNext()) {
-            initActions.next().execute(context);
-            return true;
+        if (currentAction >= stateActions.size()) {
+            return Optional.of(InterpreterExitReason.FINAL_STATE_REACHED);
         }
 
-        var currentState = stateMachine.state();
+        var action = stateActions.get(currentAction);
 
-        if (!stateActions.containsKey(currentState)) {
-            return false;
+        try {
+            action.execute().accept(context);
+        } catch (InterpreterTransitionException transition) {
+            stateMachine.performTransition(transition.newState());
+        } catch (InterpreterJumpException jump) {
+            if (labels.containsKey(jump.label())) {
+                currentAction = labels.get(jump.label()) - 1;
+            }
+        } catch (InterpreterExitException exit) {
+            exitReason = exit.reason();
+            return Optional.of(exitReason);
+        } finally {
+            currentAction++;
         }
 
-        stateActions.get(currentState).execute(context);
-        return true;
+        return Optional.empty();
     }
 
-    public static final class InterpreterBuilder {
-        public InterpreterBuilder() {
-            stateActions = new HashMap<>();
-        }
+    public SourceLocation location() {
+        return context.location();
+    }
 
-        public InterpreterBuilder stateAction(String state, InterpretationAction action) {
-            stateActions.put(state, action);
-            return this;
-        }
+    public Map<String, Object> namedValues() {
+        return Collections.unmodifiableMap(context.namedValues());
+    }
 
-        @SuppressWarnings("unused")
-        private InterpreterBuilder stateActions(Map<String, InterpretationAction> stateActions) {
-            this.stateActions = stateActions;
-            return this;
+    public static class InterpreterBuilder {
+
+        private int currentLabel = 0;
+
+        public String generateLabel(String prefix) {
+            return prefix + (currentLabel++);
         }
     }
 }

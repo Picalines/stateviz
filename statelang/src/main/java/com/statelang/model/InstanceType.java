@@ -33,7 +33,7 @@ public abstract class InstanceType<T> {
 
     private final Map<BinaryOperatorKey, InstanceBinaryOperator<T, ?, ?>> binaryOperators = new HashMap<>();
 
-    final void buildLibrary() {
+    private final void buildLibrary() {
         if (builtLibrary) {
             return;
         }
@@ -44,10 +44,16 @@ public abstract class InstanceType<T> {
     }
 
     public final Optional<InstanceUnaryOperator<T, ?>> getOperator(UnaryOperator operator) {
+        buildLibrary();
+
         return Optional.ofNullable(unaryOperators.get(operator));
     }
 
-    public final <U> Optional<InstanceBinaryOperator<T, U, ?>> getOperator(BinaryOperator operator, InstanceType<U> rightType) {
+    public final <U> Optional<InstanceBinaryOperator<T, U, ?>> getOperator(BinaryOperator operator,
+        InstanceType<U> rightType)
+    {
+        buildLibrary();
+
         var key = new BinaryOperatorKey(operator, rightType);
         if (!binaryOperators.containsKey(key)) {
             return Optional.empty();
@@ -86,7 +92,8 @@ public abstract class InstanceType<T> {
             var key = new BinaryOperatorKey(operator, rightType);
 
             Preconditions.checkState(
-                !InstanceType.this.binaryOperators.containsKey(key), "binary operator is already defined"
+                !InstanceType.this.binaryOperators.containsKey(key),
+                "binary operator is already defined"
             );
 
             InstanceType.this.binaryOperators.put(

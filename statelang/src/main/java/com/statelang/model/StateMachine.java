@@ -1,8 +1,10 @@
 package com.statelang.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,8 +54,9 @@ public final class StateMachine {
 
     public static final class StateMachineBuilder {
 
-        public StateMachineBuilder() {
+        StateMachineBuilder() {
             transitions = new HashMap<>();
+            states = new ArrayList<>();
         }
 
         public StateMachineBuilder initialState(String initialState) {
@@ -72,8 +75,8 @@ public final class StateMachine {
             return this;
         }
 
-        public boolean hasDefinedStates() {
-            return !states.isEmpty();
+        public List<String> definedStates() {
+            return Collections.unmodifiableList(states);
         }
 
         @SuppressWarnings("unused")

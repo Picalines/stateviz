@@ -15,4 +15,8 @@ public final class AssignmentAction extends StateAction {
 
     @Getter
     private final ValueExpressionNode newVariableValue;
+
+    public String variableName() {
+        return variableToken.text();
+    }
 }

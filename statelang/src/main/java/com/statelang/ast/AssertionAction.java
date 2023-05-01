@@ -9,5 +9,5 @@ import lombok.experimental.Accessors;
 public class AssertionAction extends StateAction {
 
     @Getter
-    private final ValueExpressionNode assertedCondition;
+    private final ValueExpressionNode condition;
 }

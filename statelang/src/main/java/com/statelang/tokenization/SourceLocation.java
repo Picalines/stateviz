@@ -20,6 +20,10 @@ public record SourceLocation(int line, int column) implements Comparable<SourceL
 		return "Line " + line + ", Column " + column;
 	}
 
+	public SourceLocation shifted(int lineDelta, int columnDelta) {
+		return new SourceLocation(line + lineDelta, column + columnDelta);
+	}
+
 	public SourceLocation movedTrough(String text) {
 		int linesCount = 0, lastLineLength = 0;
 

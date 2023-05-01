@@ -15,4 +15,8 @@ public final class InStateDefinition extends Definition {
 
     @Getter
     private StateActionBlock actionBlock;
+
+    public String state() {
+        return stateToken.text();
+    }
 }
