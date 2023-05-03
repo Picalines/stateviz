@@ -1,7 +1,11 @@
 package com.statelang.compilation;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.statelang.ast.Definition;
 import com.statelang.ast.InStateDefinition;
 import com.statelang.ast.Program;
 import com.statelang.diagnostics.Report;
@@ -28,10 +32,13 @@ public final class ProgramCompiler {
 
         var definitions = program.definitions();
 
-        definitions
-            .stream()
-            .filter(def -> !(def instanceof InStateDefinition))
-            .forEach(def -> DefinitionCompiler.compile(compilationContext, def));
+        Map<Boolean, List<Definition>> partitionedDefinitions = definitions.stream()
+            .collect(Collectors.partitioningBy(def -> def instanceof InStateDefinition));
+
+        var stateDefinitions = partitionedDefinitions.get(true);
+        var nonStateDefinitions = partitionedDefinitions.get(false);
+
+        nonStateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
 
         interpreterBuilder
             .stateAction(new InterpretationAction(Interpreter.SELECT_BRANCH_LABEL))
@@ -42,10 +49,7 @@ public final class ProgramCompiler {
                 c.jumpTo(Interpreter.EXIT_LABEL);
             }));
 
-        definitions
-            .stream()
-            .filter(def -> def instanceof InStateDefinition)
-            .forEach(def -> DefinitionCompiler.compile(compilationContext, def));
+        stateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
 
         interpreterBuilder.stateAction(new InterpretationAction(Interpreter.EXIT_LABEL, c -> {
             c.exit(InterpreterExitReason.FINAL_STATE_REACHED);
