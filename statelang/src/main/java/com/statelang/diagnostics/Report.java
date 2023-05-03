@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 import com.statelang.tokenization.SourceLocation;
 import com.statelang.tokenization.SourceSelection;
 import com.statelang.tokenization.Token;
@@ -49,7 +51,7 @@ public final class Report {
 		TYPE_ERROR(Severity.ERROR),
 		
 		UNREACHABLE_CODE(Severity.WARNING),
-		UNREACHABLE_STATE(Severity.ERROR);
+		UNREACHABLE_STATE(Severity.WARNING);
 
 		@Getter
 		private final Severity severity;
@@ -72,6 +74,11 @@ public final class Report {
 	@Getter
 	@Builder.Default
 	private final List<Token.Kind> expectedTokenKinds = Collections.emptyList();
+
+	@Getter
+	@Nullable
+	@Builder.Default
+	private final String info = null;
 
 	public Severity severity() {
 		return kind.severity;
