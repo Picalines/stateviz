@@ -35,21 +35,21 @@ public final class Report {
 
 		VALUE_EXPRESSION_EXPECTED(Severity.ERROR),
 		CONDITION_EXPECTED(Severity.ERROR),
-		
+
 		AMBIGUOUS_DEFINITION(Severity.ERROR),
 		MISSING_STATE_DEFINITION(Severity.ERROR),
 		TOO_LITTLE_STATES(Severity.ERROR),
-		
+
 		DUPLICATE_IDENTIFIER(Severity.ERROR),
-		
+
 		UNDEFINED_OPERATOR(Severity.ERROR),
 		UNDEFINED_VARIABLE(Severity.ERROR),
 		UNDEFINED_STATE(Severity.ERROR),
-		
+
 		CONSTANT_ASSIGNMENT(Severity.ERROR),
-		
+
 		TYPE_ERROR(Severity.ERROR),
-		
+
 		UNREACHABLE_CODE(Severity.WARNING),
 		UNREACHABLE_STATE(Severity.WARNING);
 
@@ -96,8 +96,8 @@ public final class Report {
 	public static Report determineMostRelevant(Report first, Report second) {
 		if (first.severity() != second.severity()) {
 			return first.severity().ordinal() > second.severity().ordinal()
-					? first
-					: second;
+				? first
+				: second;
 		}
 
 		if (first.selection().equals(second.selection())) {
@@ -106,20 +106,20 @@ public final class Report {
 			var expectedTokenKinds = Stream.concat(firstExpectedTokens, secondExpectedTokens).toList();
 
 			return Report.builder()
-					.selection(first.selection())
-					.kind(first.kind())
-					.expectedTokenKinds(expectedTokenKinds)
-					.build();
+				.selection(first.selection())
+				.kind(first.kind())
+				.expectedTokenKinds(expectedTokenKinds)
+				.build();
 		}
 
 		if (first.location().equals(second.location())) {
 			return first.selection().end().isBefore(second.selection().end())
-					? first
-					: second;
+				? first
+				: second;
 		}
 
 		return first.location().isAfter(second.location())
-				? first
-				: second;
+			? first
+			: second;
 	}
 }
