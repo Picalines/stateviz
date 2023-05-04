@@ -8,7 +8,6 @@ import com.statelang.ast.InStateDefinition;
 import com.statelang.ast.StateDefinition;
 import com.statelang.ast.VariableDefinition;
 import com.statelang.diagnostics.Report;
-import com.statelang.interpretation.Interpreter;
 import com.statelang.tokenization.SourceSelection;
 
 import lombok.AccessLevel;
@@ -82,14 +81,13 @@ final class DefinitionCompiler {
 
         var interpreterBuilder = context.interpreterBuilder();
 
-        // TODO
-        // if (interpreterBuilder.definedStateActions().containsKey(state)) {
-        // context.reporter().report(
-        // Report.builder()
-        // .kind(Report.Kind.AMBIGUOUS_DEFINITION)
-        // .selection(inStateDefinition.stateToken().selection())
-        // );
-        // }
+        if (interpreterBuilder.hasDefinedLabel(state)) {
+            context.reporter().report(
+                Report.builder()
+                    .kind(Report.Kind.AMBIGUOUS_DEFINITION)
+                    .selection(inStateDefinition.stateToken().selection())
+            );
+        }
 
         interpreterBuilder.jumpLabel(state);
 
@@ -98,7 +96,7 @@ final class DefinitionCompiler {
             inStateDefinition.actionBlock()
         );
 
-        interpreterBuilder.instruction(c -> c.jumpTo(Interpreter.SELECT_BRANCH_LABEL));
+        interpreterBuilder.instruction(c -> c.jumpTo(ProgramCompiler.SELECT_BRANCH_LABEL));
     }
 
     private static void compileVariableDefinition(CompilationContext context, VariableDefinition definition) {

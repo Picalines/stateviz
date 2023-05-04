@@ -27,6 +27,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ProgramCompiler {
 
+    static final String EXIT_LABEL = "$exit$";
+
+    static final String SELECT_BRANCH_LABEL = "$select_branch$";
+
     public static Optional<Interpreter> compile(Reporter reporter, Program program) {
         var stateMachineBuilder = StateMachine.builder();
         var interpreterBuilder = Interpreter.builder();
@@ -44,14 +48,14 @@ public final class ProgramCompiler {
         nonStateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
 
         interpreterBuilder
-            .jumpLabel(Interpreter.SELECT_BRANCH_LABEL)
+            .jumpLabel(SELECT_BRANCH_LABEL)
             .instruction(c -> c.jumpTo(c.state()))
-            .instruction(c -> c.jumpTo(Interpreter.EXIT_LABEL));
+            .instruction(c -> c.jumpTo(EXIT_LABEL));
 
         stateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
 
         interpreterBuilder
-            .jumpLabel(Interpreter.EXIT_LABEL)
+            .jumpLabel(EXIT_LABEL)
             .instruction(c -> c.exit(InterpreterExitReason.FINAL_STATE_REACHED));
 
         if (stateMachineBuilder.definedStates().isEmpty()) {

@@ -15,10 +15,6 @@ import lombok.Getter;
 
 public final class Interpreter {
 
-    public static final String EXIT_LABEL = "$exit$";
-
-    public static final String SELECT_BRANCH_LABEL = "$select_branch$";
-
     @Getter
     private final StateMachine stateMachine;
 
@@ -36,21 +32,14 @@ public final class Interpreter {
     private InterpreterExitReason exitReason = null;
 
     @Builder
-    public Interpreter(
+    private Interpreter(
         StateMachine stateMachine,
-        List<Instruction> instructions)
+        List<Instruction> instructions,
+        Map<String, Integer> labels)
     {
         this.stateMachine = stateMachine;
         this.instructions = Collections.unmodifiableList(instructions);
-
-        labels = new HashMap<>();
-        int i = 0;
-        for (var instruction : instructions) {
-            if (instruction instanceof LabelInstruction labelInstruction) {
-                labels.put(labelInstruction.label(), i);
-            }
-            i++;
-        }
+        this.labels = Collections.unmodifiableMap(labels);
 
         context = new InterpretationContext(stateMachine::state);
     }
@@ -97,6 +86,7 @@ public final class Interpreter {
 
         private InterpreterBuilder() {
             instructions = new ArrayList<>();
+            labels = new HashMap<>();
         }
 
         public InterpreterBuilder instruction(ActionInstruction actionInstruction) {
@@ -120,8 +110,13 @@ public final class Interpreter {
         }
 
         public InterpreterBuilder jumpLabel(String label) {
+            labels.put(label, instructions.size());
             instructions.add(new LabelInstruction(label));
             return this;
+        }
+
+        public Boolean hasDefinedLabel(String label) {
+            return labels.containsKey(label);
         }
 
         public String generateLabel(String prefix) {
@@ -130,6 +125,11 @@ public final class Interpreter {
 
         @SuppressWarnings("unused")
         private InterpreterBuilder instructions(List<Instruction> instructions) {
+            return this;
+        }
+
+        @SuppressWarnings("unused")
+        private InterpreterBuilder labels(Map<String, Integer> instructions) {
             return this;
         }
     }
