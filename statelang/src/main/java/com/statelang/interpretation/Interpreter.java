@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.google.common.base.Preconditions;
 import com.statelang.model.StateMachine;
 import com.statelang.tokenization.SourceLocation;
 
@@ -110,6 +111,7 @@ public final class Interpreter {
         }
 
         public InterpreterBuilder jumpLabel(String label) {
+            Preconditions.checkState(!hasDefinedLabel(label), "duplicate label");
             labels.put(label, instructions.size());
             instructions.add(new LabelInstruction(label));
             return this;
