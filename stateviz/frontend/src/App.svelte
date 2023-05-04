@@ -1,5 +1,5 @@
 <script lang="ts">
-	import StateLangEditor from './lib/StateLangEditor.svelte';
+	import StateLangEditor from './lib/monaco/StateLangEditor.svelte';
 
 	const dedent = (str: string) => {
 		const lines = str.split('\n').slice(1, -1);
