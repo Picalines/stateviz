@@ -39,7 +39,7 @@ dependencies {
 }
 
 task buildFrontend(type: Exec) {
-    String npmCmd = 'npm';
+    String npmCmd = 'npm'
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         npmCmd = 'npm.cmd'
     }
