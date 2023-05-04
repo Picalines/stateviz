@@ -7,7 +7,6 @@ import java.util.function.Function;
 
 import com.statelang.ast.*;
 import com.statelang.diagnostics.Report;
-import com.statelang.interpretation.InterpretationAction;
 import com.statelang.model.*;
 
 import lombok.AccessLevel;
@@ -61,7 +60,7 @@ final class ValueExpressionCompiler {
             return InvalidInstanceType.INSTANCE;
         }
 
-        context.interpreterBuilder().stateAction(new InterpretationAction(c -> {
+        context.interpreterBuilder().instruction(c -> {
             var rightValue = c.stack().pop();
             var leftValue = c.stack().pop();
 
@@ -69,7 +68,7 @@ final class ValueExpressionCompiler {
             var applyOperator = (BiFunction<Object, Object, Object>) instanceOperator.apply();
 
             c.stack().add(applyOperator.apply(leftValue, rightValue));
-        }));
+        });
 
         return instanceOperator.returnType();
     }
@@ -96,14 +95,14 @@ final class ValueExpressionCompiler {
             return InvalidInstanceType.INSTANCE;
         }
 
-        context.interpreterBuilder().stateAction(new InterpretationAction(c -> {
+        context.interpreterBuilder().instruction(c -> {
             var rightValue = c.stack().pop();
 
             @SuppressWarnings("unchecked")
             var applyOperator = (Function<Object, Object>) instanceOperator.apply();
 
             c.stack().add(applyOperator.apply(rightValue));
-        }));
+        });
 
         return instanceOperator.returnType();
     }
@@ -134,9 +133,9 @@ final class ValueExpressionCompiler {
             return InvalidInstanceType.INSTANCE;
         }
 
-        context.interpreterBuilder().stateAction(new InterpretationAction(c -> {
+        context.interpreterBuilder().instruction(c -> {
             c.stack().add(c.namedValues().get(variableName));
-        }));
+        });
 
         return type;
     }
@@ -160,9 +159,8 @@ final class ValueExpressionCompiler {
 
         var value = literal.value();
 
-        context.interpreterBuilder().stateAction(new InterpretationAction(c -> {
-            c.stack().push(value);
-        }));
+        context.interpreterBuilder()
+            .instruction(c -> c.stack().push(value));
 
         return type;
     }

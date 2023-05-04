@@ -14,7 +14,6 @@ import com.statelang.ast.Program;
 import com.statelang.ast.StateDefinition;
 import com.statelang.diagnostics.Report;
 import com.statelang.diagnostics.Reporter;
-import com.statelang.interpretation.InterpretationAction;
 import com.statelang.interpretation.Interpreter;
 import com.statelang.interpretation.InterpreterExitReason;
 import com.statelang.model.StateMachine;
@@ -45,19 +44,15 @@ public final class ProgramCompiler {
         nonStateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
 
         interpreterBuilder
-            .stateAction(new InterpretationAction(Interpreter.SELECT_BRANCH_LABEL))
-            .stateAction(new InterpretationAction(c -> {
-                c.jumpTo(c.state());
-            }))
-            .stateAction(new InterpretationAction(c -> {
-                c.jumpTo(Interpreter.EXIT_LABEL);
-            }));
+            .jumpLabel(Interpreter.SELECT_BRANCH_LABEL)
+            .instruction(c -> c.jumpTo(c.state()))
+            .instruction(c -> c.jumpTo(Interpreter.EXIT_LABEL));
 
         stateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
 
-        interpreterBuilder.stateAction(new InterpretationAction(Interpreter.EXIT_LABEL, c -> {
-            c.exit(InterpreterExitReason.FINAL_STATE_REACHED);
-        }));
+        interpreterBuilder
+            .jumpLabel(Interpreter.EXIT_LABEL)
+            .instruction(c -> c.exit(InterpreterExitReason.FINAL_STATE_REACHED));
 
         if (stateMachineBuilder.definedStates().isEmpty()) {
             reporter.report(

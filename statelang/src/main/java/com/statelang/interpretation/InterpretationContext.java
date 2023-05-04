@@ -5,12 +5,9 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.function.Supplier;
 
-import com.statelang.tokenization.SourceLocation;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
@@ -21,9 +18,6 @@ public final class InterpretationContext {
     private final Stack<Object> stack = new Stack<>();
 
     private final Map<String, Object> namedValues = new HashMap<>();
-
-    @Setter
-    private SourceLocation location = SourceLocation.FIRST_CHARACTER;
 
     public String state() {
         return getState.get();

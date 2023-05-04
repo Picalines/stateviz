@@ -8,7 +8,6 @@ import com.statelang.ast.InStateDefinition;
 import com.statelang.ast.StateDefinition;
 import com.statelang.ast.VariableDefinition;
 import com.statelang.diagnostics.Report;
-import com.statelang.interpretation.InterpretationAction;
 import com.statelang.interpretation.Interpreter;
 import com.statelang.tokenization.SourceSelection;
 
@@ -92,16 +91,14 @@ final class DefinitionCompiler {
         // );
         // }
 
-        interpreterBuilder.stateAction(new InterpretationAction(state));
+        interpreterBuilder.jumpLabel(state);
 
         StateActionCompiler.compile(
             context.withCurrentState(state),
             inStateDefinition.actionBlock()
         );
 
-        interpreterBuilder.stateAction(new InterpretationAction(c -> {
-            c.jumpTo(Interpreter.SELECT_BRANCH_LABEL);
-        }));
+        interpreterBuilder.instruction(c -> c.jumpTo(Interpreter.SELECT_BRANCH_LABEL));
     }
 
     private static void compileVariableDefinition(CompilationContext context, VariableDefinition definition) {
@@ -114,10 +111,10 @@ final class DefinitionCompiler {
 
         var interpreterBuilder = context.interpreterBuilder();
 
-        interpreterBuilder.stateAction(new InterpretationAction(c -> {
+        interpreterBuilder.instruction(c -> {
             var variableValue = c.stack().pop();
             c.namedValues().put(variableName, variableValue);
-        }));
+        });
     }
 
     private static void compileConstantDefinition(CompilationContext context, ConstantDefinition definition) {
@@ -130,10 +127,10 @@ final class DefinitionCompiler {
 
         var interpreterBuilder = context.interpreterBuilder();
 
-        interpreterBuilder.stateAction(new InterpretationAction(c -> {
+        interpreterBuilder.instruction(c -> {
             var variableValue = c.stack().pop();
             c.namedValues().put(constantName, variableValue);
-        }));
+        });
     }
 
     private static void checkDuplicateIdentifier(

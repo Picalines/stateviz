@@ -7,7 +7,6 @@ import com.statelang.ast.StateAction;
 import com.statelang.ast.StateActionBlock;
 import com.statelang.ast.TransitionAction;
 import com.statelang.diagnostics.Report;
-import com.statelang.interpretation.InterpretationAction;
 import com.statelang.interpretation.InterpreterExitReason;
 import com.statelang.model.BooleanInstanceType;
 import com.statelang.model.InvalidInstanceType;
@@ -89,12 +88,8 @@ final class StateActionCompiler {
         stateMachineBuilder.transition(context.currentState(), newState);
 
         context.interpreterBuilder()
-            .stateAction(new InterpretationAction(c -> {
-                c.performTransition(newState);
-            }))
-            .stateAction(new InterpretationAction(c -> {
-                c.jumpTo(newState);
-            }));
+            .instruction(c -> c.performTransition(newState))
+            .instruction(c -> c.jumpTo(newState));
     }
 
     private static void compileAssignment(
@@ -139,10 +134,10 @@ final class StateActionCompiler {
             );
         }
 
-        context.interpreterBuilder().stateAction(new InterpretationAction(c -> {
+        context.interpreterBuilder().instruction(c -> {
             var variableValue = c.stack().pop();
             c.namedValues().put(variableName, variableValue);
-        }));
+        });
     }
 
     private static void compileConditional(
@@ -164,25 +159,25 @@ final class StateActionCompiler {
         var endLabel = interpreterBuilder.generateLabel("$if_end");
         var falseBranchLabel = interpreterBuilder.generateLabel("$if_false");
 
-        interpreterBuilder.stateAction(new InterpretationAction(c -> {
+        interpreterBuilder.instruction(c -> {
             var conditionValue = c.stack().pop();
             if (conditionValue == Boolean.FALSE) {
                 c.jumpTo(falseBranchLabel);
             }
-        }));
+        });
 
         compile(context, conditionalAction.trueBlock());
 
-        interpreterBuilder.stateAction(new InterpretationAction(c -> c.jumpTo(endLabel)));
-
-        interpreterBuilder.stateAction(new InterpretationAction(falseBranchLabel));
+        interpreterBuilder
+            .instruction(c -> c.jumpTo(endLabel))
+            .jumpLabel(falseBranchLabel);
 
         var falseBlock = conditionalAction.falseBlock();
         if (falseBlock != null) {
             compile(context, falseBlock);
         }
 
-        interpreterBuilder.stateAction(new InterpretationAction(endLabel));
+        interpreterBuilder.jumpLabel(endLabel);
     }
 
     private static void compileAssertion(
@@ -201,13 +196,12 @@ final class StateActionCompiler {
 
         var conditionLocation = assertionAction.condition().selection().start();
 
-        context.interpreterBuilder().stateAction(new InterpretationAction(c -> {
+        context.interpreterBuilder().instruction(conditionLocation, c -> {
             var conditionValue = c.stack().pop();
 
             if (conditionValue == Boolean.FALSE) {
-                c.location(conditionLocation);
                 c.exit(InterpreterExitReason.ASSERTION_FAILED);
             }
-        }));
+        });
     }
 }
