@@ -1,0 +1,25 @@
+{
+	"plugins": ["prettier-plugin-svelte"],
+	"pluginSearchDirs": ["."],
+	"overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }],
+
+	"svelteIndentScriptAndStyle": true,
+	"svelteAllowShorthand": true,
+	"svelteBracketNewLine": true,
+	"svelteSortOrder": "options-scripts-markup-styles",
+
+	"useTabs": true,
+	"singleQuote": true,
+	"trailingComma": "all",
+	"arrowParens": "avoid",
+	"printWidth": 100,
+
+	"importOrderSeparation": false,
+	"importOrder": [
+		"^svelte(/|$)",
+		"^axios$",
+        "^\\w.*",
+		"\\./",
+		".+\\.(css|sass|scss)$"
+	]
+}

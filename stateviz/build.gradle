@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 plugins {
     id 'application'
     id 'org.springframework.boot' version '3.0.6'
@@ -34,6 +36,15 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.assertj:assertj-core:3.23.1'
+}
+
+task buildFrontend(type: Exec) {
+    String npmCmd = 'npm';
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        npmCmd = 'npm.cmd'
+    }
+    workingDir './frontend'
+    commandLine npmCmd, 'run', 'build'
 }
 
 tasks.named('test') {
