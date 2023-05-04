@@ -134,7 +134,9 @@ final class StateActionCompiler {
             );
         }
 
-        context.interpreterBuilder().instruction(c -> {
+        var assignmentLocation = assignmentAction.variableToken().selection().start();
+
+        context.interpreterBuilder().instruction(assignmentLocation, c -> {
             var variableValue = c.stack().pop();
             c.namedValues().put(variableName, variableValue);
         });
@@ -159,7 +161,9 @@ final class StateActionCompiler {
         var endLabel = interpreterBuilder.generateLabel("$if_end");
         var falseBranchLabel = interpreterBuilder.generateLabel("$if_false");
 
-        interpreterBuilder.instruction(c -> {
+        var conditionLocation = conditionalAction.condition().selection().start();
+
+        interpreterBuilder.instruction(conditionLocation, c -> {
             var conditionValue = c.stack().pop();
             if (conditionValue == Boolean.FALSE) {
                 c.jumpTo(falseBranchLabel);
