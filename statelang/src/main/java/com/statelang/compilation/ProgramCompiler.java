@@ -8,14 +8,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Suppliers;
-import com.statelang.ast.Definition;
-import com.statelang.ast.InStateDefinition;
-import com.statelang.ast.Program;
-import com.statelang.ast.StateDefinition;
+import com.statelang.ast.*;
+import com.statelang.compilation.result.JumpToInstruction;
 import com.statelang.diagnostics.Report;
 import com.statelang.diagnostics.Reporter;
-import com.statelang.interpretation.Interpreter;
-import com.statelang.interpretation.InterpreterExitReason;
 import com.statelang.model.StateMachine;
 import com.statelang.parsing.ProgramParser;
 import com.statelang.tokenization.SourceSelection;
@@ -27,15 +23,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ProgramCompiler {
 
-    static final String EXIT_LABEL = "$exit$";
-
-    static final String SELECT_BRANCH_LABEL = "$select_branch$";
-
-    public static Optional<Interpreter> compile(Reporter reporter, Program program) {
+    public static Optional<CompiledProgram> compile(Reporter reporter, Program program) {
         var stateMachineBuilder = StateMachine.builder();
-        var interpreterBuilder = Interpreter.builder();
+        var programBuilder = CompiledProgram.builder();
 
-        var compilationContext = new CompilationContext(reporter, stateMachineBuilder, interpreterBuilder);
+        var compilationContext = CompilationContext.builder()
+            .reporter(reporter)
+            .stateMachineBuilder(stateMachineBuilder)
+            .programBuilder(programBuilder)
+            .build();
 
         var definitions = program.definitions();
 
@@ -47,16 +43,9 @@ public final class ProgramCompiler {
 
         nonStateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
 
-        interpreterBuilder
-            .jumpLabel(SELECT_BRANCH_LABEL)
-            .instruction(c -> c.jumpTo(c.state()))
-            .instruction(c -> c.jumpTo(EXIT_LABEL));
+        programBuilder.instruction(new JumpToInstruction(stateMachineBuilder.definedInitialState()));
 
         stateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
-
-        interpreterBuilder
-            .jumpLabel(EXIT_LABEL)
-            .instruction(c -> c.exit(InterpreterExitReason.FINAL_STATE_REACHED));
 
         if (stateMachineBuilder.definedStates().isEmpty()) {
             reporter.report(
@@ -74,11 +63,11 @@ public final class ProgramCompiler {
 
         warnUnreachableStates(reporter, definitions, stateMachine);
 
-        interpreterBuilder.stateMachine(stateMachine);
-        return Optional.of(interpreterBuilder.build());
+        programBuilder.stateMachine(stateMachine);
+        return Optional.of(programBuilder.build());
     }
 
-    public static Optional<Interpreter> compile(Reporter reporter, SourceText sourceText) {
+    public static Optional<CompiledProgram> compile(Reporter reporter, SourceText sourceText) {
         var program = ProgramParser.program.tryParse(sourceText, reporter);
         return program.flatMap(programTree -> compile(reporter, programTree));
     }
@@ -95,7 +84,7 @@ public final class ProgramCompiler {
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
 
-        reachableStates.add(stateMachine.state());
+        reachableStates.add(stateMachine.initialState());
 
         var unreachableStates = stateMachine
             .states()

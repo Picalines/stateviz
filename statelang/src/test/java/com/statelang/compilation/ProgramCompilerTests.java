@@ -14,7 +14,7 @@ class ProgramCompilerTests {
     void counter() {
         var reporter = new Reporter();
 
-        var interpreter = ProgramCompiler.compile(reporter, SourceText.fromString("test", """
+        var compiledProgram = ProgramCompiler.compile(reporter, SourceText.fromString("test", """
             state {
                 COUNTING,
                 STOPPED,
@@ -34,7 +34,7 @@ class ProgramCompilerTests {
             }
             """));
 
-        assertTrue(interpreter.isPresent());
+        assertTrue(compiledProgram.isPresent());
         assertEquals(0, reporter.reports().size());
     }
 }

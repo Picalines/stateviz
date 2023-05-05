@@ -23,13 +23,13 @@ public final class StateMachine {
     private final Map<String, Set<String>> transitions;
 
     @Getter
-    private String state;
+    private String initialState;
 
     @Builder
     private StateMachine(@Singular Set<String> states, String initialState, Map<String, Set<String>> transitions) {
         Preconditions.checkArgument(!states.isEmpty());
 
-        state = initialState;
+        this.initialState = initialState;
 
         this.states = Collections.unmodifiableSet(states);
 
@@ -40,16 +40,6 @@ public final class StateMachine {
         }
 
         this.transitions = Collections.unmodifiableMap(transitionsCopy);
-    }
-
-    public void performTransition(String newState) {
-        Preconditions.checkArgument(states.contains(newState), "undefined state");
-
-        var possibleNewStates = transitions.get(state);
-        Preconditions.checkState(possibleNewStates != null, "no transitions from current state");
-        Preconditions.checkState(possibleNewStates.contains(newState), "no transition to newState");
-
-        state = newState;
     }
 
     public static final class StateMachineBuilder {
@@ -73,6 +63,10 @@ public final class StateMachine {
                 .add(to);
 
             return this;
+        }
+
+        public String definedInitialState() {
+            return initialState;
         }
 
         public List<String> definedStates() {

@@ -7,6 +7,10 @@ import com.statelang.ast.Definition;
 import com.statelang.ast.InStateDefinition;
 import com.statelang.ast.StateDefinition;
 import com.statelang.ast.VariableDefinition;
+import com.statelang.compilation.result.JumpToInstruction;
+import com.statelang.compilation.result.LabelInstruction;
+import com.statelang.compilation.result.SourceLocationInstruction;
+import com.statelang.compilation.result.StoreInstruction;
 import com.statelang.diagnostics.Report;
 import com.statelang.tokenization.SourceSelection;
 
@@ -79,9 +83,9 @@ final class DefinitionCompiler {
             );
         }
 
-        var interpreterBuilder = context.interpreterBuilder();
+        var programBuilder = context.programBuilder();
 
-        if (interpreterBuilder.hasDefinedLabel(state)) {
+        if (programBuilder.hasDefinedLabel(state)) {
             context.reporter().report(
                 Report.builder()
                     .kind(Report.Kind.AMBIGUOUS_DEFINITION)
@@ -89,46 +93,53 @@ final class DefinitionCompiler {
             );
         }
 
-        interpreterBuilder.jumpLabel(state);
+        programBuilder
+            .instruction(new LabelInstruction(state))
+            .instruction(
+                new SourceLocationInstruction(inStateDefinition.stateToken().selection().start())
+            );
 
-        StateActionCompiler.compile(
-            context.withCurrentState(state),
-            inStateDefinition.actionBlock()
-        );
+        context.currentState(state);
+        StateActionCompiler.compile(context, inStateDefinition.actionBlock());
+        context.currentState(null);
 
-        interpreterBuilder.instruction(c -> c.jumpTo(ProgramCompiler.SELECT_BRANCH_LABEL));
+        programBuilder.instruction(new JumpToInstruction(state));
     }
 
     private static void compileVariableDefinition(CompilationContext context, VariableDefinition definition) {
-        checkDuplicateIdentifier(context, definition.variableName(), definition.variableNameToken().selection());
+        var variableName = definition.variableName();
+
+        checkDuplicateIdentifier(context, variableName, definition.variableNameToken().selection());
+
+        var programBuilder = context.programBuilder();
+
+        programBuilder.instruction(
+            new SourceLocationInstruction(definition.initialVariableValue().selection().start())
+        );
 
         var expressionType = ValueExpressionCompiler.compile(context, definition.initialVariableValue());
-        var variableName = definition.variableName();
 
         context.variables().put(variableName, expressionType);
 
-        var interpreterBuilder = context.interpreterBuilder();
-
-        interpreterBuilder.instruction(c -> {
-            var variableValue = c.stack().pop();
-            c.namedValues().put(variableName, variableValue);
-        });
+        programBuilder.instruction(new StoreInstruction(variableName));
     }
 
     private static void compileConstantDefinition(CompilationContext context, ConstantDefinition definition) {
-        checkDuplicateIdentifier(context, definition.constantName(), definition.constantNameToken().selection());
+        var constantName = definition.constantName();
+
+        checkDuplicateIdentifier(context, constantName, definition.constantNameToken().selection());
+
+        var programBuilder = context.programBuilder();
+
+        programBuilder.instruction(
+            new SourceLocationInstruction(definition.initialConstantValue().selection().start())
+        );
 
         var expressionType = ValueExpressionCompiler.compile(context, definition.initialConstantValue());
-        var constantName = definition.constantName();
 
         context.constants().put(constantName, expressionType);
 
-        var interpreterBuilder = context.interpreterBuilder();
-
-        interpreterBuilder.instruction(c -> {
-            var variableValue = c.stack().pop();
-            c.namedValues().put(constantName, variableValue);
-        });
+        programBuilder.instruction(new StoreInstruction(constantName));
     }
 
     private static void checkDuplicateIdentifier(
@@ -137,8 +148,11 @@ final class DefinitionCompiler {
         SourceSelection identifierSelection)
     {
         var identifiers = Stream.concat(
-            context.variables().keySet().stream(),
-            context.constants().keySet().stream()
+            Stream.concat(
+                context.variables().keySet().stream(),
+                context.constants().keySet().stream()
+            ),
+            context.stateMachineBuilder().definedStates().stream()
         );
 
         if (identifiers.anyMatch(identifier::equals)) {

@@ -1,15 +1,9 @@
 package com.statelang.compilation;
 
-import com.statelang.ast.AssertionAction;
-import com.statelang.ast.AssignmentAction;
-import com.statelang.ast.ConditionalAction;
-import com.statelang.ast.StateAction;
-import com.statelang.ast.StateActionBlock;
-import com.statelang.ast.TransitionAction;
+import com.statelang.ast.*;
+import com.statelang.compilation.result.*;
 import com.statelang.diagnostics.Report;
-import com.statelang.interpretation.InterpreterExitReason;
-import com.statelang.model.BooleanInstanceType;
-import com.statelang.model.InvalidInstanceType;
+import com.statelang.model.*;
 import com.statelang.tokenization.SourceLocation;
 
 import lombok.AccessLevel;
@@ -87,9 +81,12 @@ final class StateActionCompiler {
 
         stateMachineBuilder.transition(context.currentState(), newState);
 
-        context.interpreterBuilder()
-            .instruction(c -> c.performTransition(newState))
-            .instruction(c -> c.jumpTo(newState));
+        context.programBuilder()
+            .instruction(
+                new SourceLocationInstruction(transitionAction.newStateToken().selection().start())
+            )
+            .instruction(new JumpToInstruction(newState))
+            .instruction(ExitInstruction.SUCCESS);
     }
 
     private static void compileAssignment(
@@ -118,6 +115,12 @@ final class StateActionCompiler {
             }
         }
 
+        var programBuilder = context.programBuilder();
+
+        programBuilder.instruction(
+            new SourceLocationInstruction(assignmentAction.variableToken().selection().start())
+        );
+
         var valueType = ValueExpressionCompiler.compile(context, assignmentAction.newVariableValue());
 
         if (isConstant || valueType == InvalidInstanceType.INSTANCE) {
@@ -134,18 +137,19 @@ final class StateActionCompiler {
             );
         }
 
-        var assignmentLocation = assignmentAction.variableToken().selection().start();
-
-        context.interpreterBuilder().instruction(assignmentLocation, c -> {
-            var variableValue = c.stack().pop();
-            c.namedValues().put(variableName, variableValue);
-        });
+        programBuilder.instruction(new StoreInstruction(variableName));
     }
 
     private static void compileConditional(
         CompilationContext context,
         ConditionalAction conditionalAction)
     {
+        var programBuilder = context.programBuilder();
+
+        programBuilder.instruction(
+            new SourceLocationInstruction(conditionalAction.condition().selection().start())
+        );
+
         var conditionType = ValueExpressionCompiler.compile(context, conditionalAction.condition());
 
         if (conditionType != InvalidInstanceType.INSTANCE && conditionType != BooleanInstanceType.INSTANCE) {
@@ -156,38 +160,37 @@ final class StateActionCompiler {
             );
         }
 
-        var interpreterBuilder = context.interpreterBuilder();
+        var endLabel = programBuilder.generateLabel("$if_end");
+        var falseBranchLabel = programBuilder.generateLabel("$if_false");
 
-        var endLabel = interpreterBuilder.generateLabel("$if_end");
-        var falseBranchLabel = interpreterBuilder.generateLabel("$if_false");
-
-        var conditionLocation = conditionalAction.condition().selection().start();
-
-        interpreterBuilder.instruction(conditionLocation, c -> {
-            var conditionValue = c.stack().pop();
-            if (conditionValue == Boolean.FALSE) {
-                c.jumpTo(falseBranchLabel);
-            }
-        });
+        programBuilder.instruction(new JumpToIfNotInstruction(falseBranchLabel));
 
         compile(context, conditionalAction.trueBlock());
 
-        interpreterBuilder
-            .instruction(c -> c.jumpTo(endLabel))
-            .jumpLabel(falseBranchLabel);
+        programBuilder
+            .instruction(new JumpToInstruction(endLabel))
+            .instruction(new LabelInstruction(falseBranchLabel));
 
         var falseBlock = conditionalAction.falseBlock();
         if (falseBlock != null) {
             compile(context, falseBlock);
         }
 
-        interpreterBuilder.jumpLabel(endLabel);
+        programBuilder.instruction(new LabelInstruction(endLabel));
     }
 
     private static void compileAssertion(
         CompilationContext context,
         AssertionAction assertionAction)
     {
+        var programBuilder = context.programBuilder();
+
+        programBuilder.instruction(
+            new SourceLocationInstruction(
+                assertionAction.condition().selection().start()
+            )
+        );
+
         var conditionType = ValueExpressionCompiler.compile(context, assertionAction.condition());
 
         if (conditionType != InvalidInstanceType.INSTANCE && conditionType != BooleanInstanceType.INSTANCE) {
@@ -198,14 +201,14 @@ final class StateActionCompiler {
             );
         }
 
-        var conditionLocation = assertionAction.condition().selection().start();
+        var successLabel = programBuilder.generateLabel("$assert_true");
+        var failureLabel = programBuilder.generateLabel("$assert_false");
 
-        context.interpreterBuilder().instruction(conditionLocation, c -> {
-            var conditionValue = c.stack().pop();
-
-            if (conditionValue == Boolean.FALSE) {
-                c.exit(InterpreterExitReason.ASSERTION_FAILED);
-            }
-        });
+        programBuilder
+            .instruction(new JumpToIfNotInstruction(failureLabel))
+            .instruction(new JumpToInstruction(successLabel))
+            .instruction(new LabelInstruction(failureLabel))
+            .instruction(ExitInstruction.FAILURE)
+            .instruction(new LabelInstruction(successLabel));
     }
 }

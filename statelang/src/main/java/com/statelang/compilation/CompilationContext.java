@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.statelang.diagnostics.Reporter;
-import com.statelang.interpretation.Interpreter;
 import com.statelang.model.InstanceType;
 import com.statelang.model.StateMachine;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-@RequiredArgsConstructor
+@Builder
 final class CompilationContext {
 
     @Getter
@@ -21,43 +21,16 @@ final class CompilationContext {
     private final StateMachine.StateMachineBuilder stateMachineBuilder;
 
     @Getter
-    private final Interpreter.InterpreterBuilder interpreterBuilder;
+    private final CompiledProgram.CompiledProgramBuilder programBuilder;
 
     @Getter
+    @Setter
+    @Builder.Default
     private String currentState = null;
 
     @Getter
-    private Map<String, InstanceType<?>> constants = new HashMap<>();
+    private final Map<String, InstanceType<?>> constants = new HashMap<>();
 
     @Getter
-    private Map<String, InstanceType<?>> variables = new HashMap<>();
-
-    private CompilationContext(
-        Reporter reporter,
-        StateMachine.StateMachineBuilder stateMachineBuilder,
-        Interpreter.InterpreterBuilder interpreterBuilder,
-        String currentState,
-        Map<String, InstanceType<?>> constants,
-        Map<String, InstanceType<?>> variables)
-    {
-        this.reporter = reporter;
-        this.stateMachineBuilder = stateMachineBuilder;
-        this.interpreterBuilder = interpreterBuilder;
-        this.currentState = currentState;
-        this.constants = constants;
-        this.variables = variables;
-    }
-
-    public CompilationContext withCurrentState(String newCurrentState) {
-        return currentState == newCurrentState
-            ? this
-            : new CompilationContext(
-                reporter,
-                stateMachineBuilder,
-                interpreterBuilder,
-                newCurrentState,
-                constants,
-                variables
-            );
-    }
+    private final Map<String, InstanceType<?>> variables = new HashMap<>();
 }

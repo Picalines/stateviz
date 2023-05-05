@@ -9,13 +9,13 @@ public final class BooleanInstanceType extends InstanceType<Boolean> {
 
             final var booleanType = INSTANCE;
 
-            define.operator(UnaryOperator.NOT, booleanType, bool -> !bool);
+            define.operator(UnaryOperator.NOT, booleanType);
 
-            define.operator(BinaryOperator.AND, booleanType, booleanType, (a, b) -> a && b);
-            define.operator(BinaryOperator.OR, booleanType, booleanType, (a, b) -> a || b);
+            define.operator(BinaryOperator.AND, booleanType, booleanType);
+            define.operator(BinaryOperator.OR, booleanType, booleanType);
 
-            define.operator(BinaryOperator.EQUALS, booleanType, booleanType, (a, b) -> a.equals(b));
-            define.operator(BinaryOperator.NOT_EQUALS, booleanType, booleanType, (a, b) -> !a.equals(b));
+            define.operator(BinaryOperator.EQUALS, booleanType, booleanType);
+            define.operator(BinaryOperator.NOT_EQUALS, booleanType, booleanType);
         });
     }
 }
