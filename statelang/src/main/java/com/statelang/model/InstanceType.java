@@ -3,19 +3,44 @@ package com.statelang.model;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import com.google.common.base.Preconditions;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
 @RequiredArgsConstructor
 public abstract class InstanceType<T> {
+
+    @AllArgsConstructor
+    @Accessors(fluent = true)
+    @Getter
+    @Builder(access = AccessLevel.PRIVATE)
+    public static final class InstanceBinaryOperator<TLeft, TRight, TReturn> {
+
+        private final InstanceType<TLeft> leftType;
+
+        private final InstanceType<TRight> rightType;
+
+        private final InstanceType<TReturn> returnType;
+    }
+
+    @AllArgsConstructor
+    @Accessors(fluent = true)
+    @Getter
+    @Builder(access = AccessLevel.PRIVATE)
+    public static final class InstanceUnaryOperator<TRight, TReturn> {
+
+        private final InstanceType<TRight> rightType;
+
+        private final InstanceType<TReturn> returnType;
+    }
 
     @Getter
     private final String name;
@@ -67,7 +92,7 @@ public abstract class InstanceType<T> {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     final class LibraryBuilder {
 
-        public <R> void operator(UnaryOperator operator, InstanceType<R> returnType, Function<T, R> apply) {
+        public <R> void operator(UnaryOperator operator, InstanceType<R> returnType) {
             Preconditions.checkState(
                 !InstanceType.this.unaryOperators.containsKey(operator), "unary operator is already defined"
             );
@@ -75,10 +100,8 @@ public abstract class InstanceType<T> {
             InstanceType.this.unaryOperators.put(
                 operator,
                 InstanceUnaryOperator.<T, R>builder()
-                    .operator(operator)
-                    .righType(InstanceType.this)
+                    .rightType(InstanceType.this)
                     .returnType(returnType)
-                    .apply(apply)
                     .build()
             );
         }
@@ -86,8 +109,7 @@ public abstract class InstanceType<T> {
         public <U, R> void operator(
             BinaryOperator operator,
             InstanceType<U> rightType,
-            InstanceType<R> returnType,
-            BiFunction<T, U, R> apply)
+            InstanceType<R> returnType)
         {
             var key = new BinaryOperatorKey(operator, rightType);
 
@@ -99,11 +121,9 @@ public abstract class InstanceType<T> {
             InstanceType.this.binaryOperators.put(
                 key,
                 InstanceBinaryOperator.<T, U, R>builder()
-                    .operator(operator)
                     .leftType(InstanceType.this)
                     .rightType(rightType)
                     .returnType(returnType)
-                    .apply(apply)
                     .build()
             );
         }

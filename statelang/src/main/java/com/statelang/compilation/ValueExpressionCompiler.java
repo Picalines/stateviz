@@ -2,10 +2,12 @@ package com.statelang.compilation;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import com.statelang.ast.*;
+import com.statelang.compilation.result.BinaryOperatorInstruction;
+import com.statelang.compilation.result.LoadInstruction;
+import com.statelang.compilation.result.PushInstruction;
+import com.statelang.compilation.result.UnaryOperatorInstruction;
 import com.statelang.diagnostics.Report;
 import com.statelang.model.*;
 
@@ -60,15 +62,8 @@ final class ValueExpressionCompiler {
             return InvalidInstanceType.INSTANCE;
         }
 
-        context.interpreterBuilder().instruction(c -> {
-            var rightValue = c.stack().pop();
-            var leftValue = c.stack().pop();
-
-            @SuppressWarnings("unchecked")
-            var applyOperator = (BiFunction<Object, Object, Object>) instanceOperator.apply();
-
-            c.stack().add(applyOperator.apply(leftValue, rightValue));
-        });
+        context.programBuilder()
+            .instruction(BinaryOperatorInstruction.of(binaryExpression.operator()));
 
         return instanceOperator.returnType();
     }
@@ -95,14 +90,8 @@ final class ValueExpressionCompiler {
             return InvalidInstanceType.INSTANCE;
         }
 
-        context.interpreterBuilder().instruction(c -> {
-            var rightValue = c.stack().pop();
-
-            @SuppressWarnings("unchecked")
-            var applyOperator = (Function<Object, Object>) instanceOperator.apply();
-
-            c.stack().add(applyOperator.apply(rightValue));
-        });
+        context.programBuilder()
+            .instruction(UnaryOperatorInstruction.of(unaryExpression.operator()));
 
         return instanceOperator.returnType();
     }
@@ -133,9 +122,8 @@ final class ValueExpressionCompiler {
             return InvalidInstanceType.INSTANCE;
         }
 
-        context.interpreterBuilder().instruction(c -> {
-            c.stack().add(c.namedValues().get(variableName));
-        });
+        context.programBuilder()
+            .instruction(new LoadInstruction(variableName));
 
         return type;
     }
@@ -157,10 +145,8 @@ final class ValueExpressionCompiler {
             );
         }
 
-        var value = literal.value();
-
-        context.interpreterBuilder()
-            .instruction(c -> c.stack().push(value));
+        context.programBuilder()
+            .instruction(new PushInstruction(literal.value()));
 
         return type;
     }
