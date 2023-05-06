@@ -146,9 +146,8 @@ final class StateActionCompiler {
     {
         var programBuilder = context.programBuilder();
 
-        programBuilder.instruction(
-            new SourceLocationInstruction(conditionalAction.condition().selection().start())
-        );
+        var conditionLocation = conditionalAction.condition().selection().start();
+        programBuilder.instruction(new SourceLocationInstruction(conditionLocation));
 
         var conditionType = ValueExpressionCompiler.compile(context, conditionalAction.condition());
 
@@ -160,8 +159,9 @@ final class StateActionCompiler {
             );
         }
 
-        var endLabel = programBuilder.generateLabel("$if_end");
-        var falseBranchLabel = programBuilder.generateLabel("$if_false");
+        var uniqueLabelKey = conditionLocation.line() + "_" + conditionLocation.column();
+        var endLabel = "$if_end" + uniqueLabelKey;
+        var falseBranchLabel = "$if_false" + uniqueLabelKey;
 
         programBuilder.instruction(new JumpToIfNotInstruction(falseBranchLabel));
 
@@ -185,11 +185,8 @@ final class StateActionCompiler {
     {
         var programBuilder = context.programBuilder();
 
-        programBuilder.instruction(
-            new SourceLocationInstruction(
-                assertionAction.condition().selection().start()
-            )
-        );
+        var conditionLocation = assertionAction.condition().selection().start();
+        programBuilder.instruction(new SourceLocationInstruction(conditionLocation));
 
         var conditionType = ValueExpressionCompiler.compile(context, assertionAction.condition());
 
@@ -201,8 +198,9 @@ final class StateActionCompiler {
             );
         }
 
-        var successLabel = programBuilder.generateLabel("$assert_true");
-        var failureLabel = programBuilder.generateLabel("$assert_false");
+        var labelUniqueKey = conditionLocation.line() + "_" + conditionLocation.column();
+        var successLabel = "$assert_true" + labelUniqueKey;
+        var failureLabel = "$assert_false" + labelUniqueKey;
 
         programBuilder
             .instruction(new JumpToIfNotInstruction(failureLabel))

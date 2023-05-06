@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Preconditions;
 import com.statelang.compilation.result.Instruction;
 import com.statelang.compilation.result.LabelInstruction;
 import com.statelang.model.StateMachine;
@@ -33,8 +34,6 @@ public final class CompiledProgram {
 
     public static final class CompiledProgramBuilder {
 
-        private int uniqueLabelId = 0;
-
         private CompiledProgramBuilder() {
             instructions = new ArrayList<>();
             jumpTable = new HashMap<>();
@@ -44,14 +43,12 @@ public final class CompiledProgram {
             instructions.add(instruction);
 
             if (instruction instanceof LabelInstruction labelInstruction) {
-                jumpTable.put(labelInstruction.label(), instructions.size() - 1);
+                var label = labelInstruction.label();
+                Preconditions.checkState(!jumpTable.containsKey(label), "duplicate label instruction");
+                jumpTable.put(label, instructions.size() - 1);
             }
 
             return this;
-        }
-
-        public String generateLabel(String prefix) {
-            return prefix + (uniqueLabelId++);
         }
 
         public boolean hasDefinedLabel(String label) {
