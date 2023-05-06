@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.base.Suppliers;
 import com.statelang.ast.*;
+import com.statelang.compilation.instruction.ExitInstruction;
 import com.statelang.compilation.instruction.JumpToInstruction;
 import com.statelang.diagnostics.Report;
 import com.statelang.diagnostics.Reporter;
@@ -38,16 +39,18 @@ public final class ProgramCompiler {
         Map<Boolean, List<Definition>> partitionedDefinitions = definitions.stream()
             .collect(Collectors.partitioningBy(def -> def instanceof InStateDefinition));
 
-        var stateDefinitions = partitionedDefinitions.get(true);
-        var nonStateDefinitions = partitionedDefinitions.get(false);
+        var inStateDefinitions = partitionedDefinitions.get(true);
+        var nonInStateDefinitions = partitionedDefinitions.get(false);
 
-        nonStateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
+        nonInStateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
 
-        programBuilder.instruction(new JumpToInstruction(stateMachineBuilder.definedInitialState()));
+        programBuilder
+            .instruction(new JumpToInstruction(stateMachineBuilder.definedInitialState()))
+            .instruction(ExitInstruction.SUCCESS);
 
-        stateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
+        inStateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
 
-        if (stateMachineBuilder.definedStates().isEmpty()) {
+        if (!nonInStateDefinitions.stream().anyMatch(def -> def instanceof StateDefinition)) {
             reporter.report(
                 Report.builder()
                     .kind(Report.Kind.MISSING_STATE_DEFINITION)
