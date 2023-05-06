@@ -71,7 +71,9 @@ final class DefinitionCompiler {
             programBuilder.symbol(new StateSymbol(state));
         });
 
-        stateMachineBuilder.initialState(states.get(0));
+        if (!states.isEmpty()) {
+            stateMachineBuilder.initialState(states.get(0));
+        }
     }
 
     private static void compileInStateDefinition(CompilationContext context, InStateDefinition inStateDefinition) {
