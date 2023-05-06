@@ -5,8 +5,11 @@ import java.util.Map;
 
 import com.statelang.model.BinaryOperator;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BinaryOperatorInstruction extends Instruction {
 
     private final static Map<BinaryOperator, BinaryOperatorInstruction> instances = new HashMap<>();
@@ -16,10 +19,5 @@ public final class BinaryOperatorInstruction extends Instruction {
 
     public static BinaryOperatorInstruction of(BinaryOperator operator) {
         return instances.computeIfAbsent(operator, BinaryOperatorInstruction::new);
-    }
-
-    private BinaryOperatorInstruction(BinaryOperator operator) {
-        super("bin_op");
-        this.operator = operator;
     }
 }
