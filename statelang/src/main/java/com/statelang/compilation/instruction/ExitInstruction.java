@@ -1,7 +1,10 @@
 package com.statelang.compilation.instruction;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ExitInstruction extends Instruction {
 
     public static final ExitInstruction SUCCESS = new ExitInstruction(true);
@@ -10,9 +13,4 @@ public final class ExitInstruction extends Instruction {
 
     @Getter
     private final boolean success;
-
-    private ExitInstruction(boolean success) {
-        super("exit");
-        this.success = success;
-    }
 }
