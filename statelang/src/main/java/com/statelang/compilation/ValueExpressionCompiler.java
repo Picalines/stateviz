@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.statelang.ast.*;
-import com.statelang.compilation.result.BinaryOperatorInstruction;
-import com.statelang.compilation.result.LoadInstruction;
-import com.statelang.compilation.result.PushInstruction;
-import com.statelang.compilation.result.UnaryOperatorInstruction;
+import com.statelang.compilation.instruction.BinaryOperatorInstruction;
+import com.statelang.compilation.instruction.LoadInstruction;
+import com.statelang.compilation.instruction.PushInstruction;
+import com.statelang.compilation.instruction.UnaryOperatorInstruction;
+import com.statelang.compilation.symbol.ConstantSymbol;
+import com.statelang.compilation.symbol.VariableSymbol;
 import com.statelang.diagnostics.Report;
 import com.statelang.model.*;
 
@@ -45,7 +47,7 @@ final class ValueExpressionCompiler {
     {
         var leftType = compile(context, binaryExpression.left());
         var rightType = compile(context, binaryExpression.right());
-        if (leftType == InvalidInstanceType.INSTANCE || rightType == InvalidInstanceType.INSTANCE) {
+        if (leftType == UnknownInstanceType.INSTANCE || rightType == UnknownInstanceType.INSTANCE) {
             return leftType;
         }
 
@@ -59,7 +61,7 @@ final class ValueExpressionCompiler {
                     .selection(expressionSelection)
             );
 
-            return InvalidInstanceType.INSTANCE;
+            return UnknownInstanceType.INSTANCE;
         }
 
         context.programBuilder()
@@ -73,7 +75,7 @@ final class ValueExpressionCompiler {
         UnaryValueExpressionNode unaryExpression)
     {
         var rightType = compile(context, unaryExpression.right());
-        if (rightType == InvalidInstanceType.INSTANCE) {
+        if (rightType == UnknownInstanceType.INSTANCE) {
             return rightType;
         }
 
@@ -87,7 +89,7 @@ final class ValueExpressionCompiler {
                     .selection(expressionSelection)
             );
 
-            return InvalidInstanceType.INSTANCE;
+            return UnknownInstanceType.INSTANCE;
         }
 
         context.programBuilder()
@@ -100,32 +102,36 @@ final class ValueExpressionCompiler {
         CompilationContext context,
         VariableValueNode variable)
     {
+        var symbols = context.programBuilder().definedSymbols();
         var variableName = variable.identifier();
 
-        InstanceType<Object> type;
+        InstanceType<?> variableType = UnknownInstanceType.INSTANCE;
 
-        if (context.variables().containsKey(variableName)) {
-            @SuppressWarnings("unchecked")
-            var variableType = (InstanceType<Object>) context.variables().get(variableName);
-            type = variableType;
-        } else if (context.constants().containsKey(variableName)) {
-            @SuppressWarnings("unchecked")
-            var constantType = (InstanceType<Object>) context.constants().get(variableName);
-            type = constantType;
+        if (symbols.containsKey(variableName)) {
+            var symbol = symbols.get(variableName);
+            if (symbol instanceof VariableSymbol variableSymbol) {
+                variableType = variableSymbol.variableType();
+            } else if (symbol instanceof ConstantSymbol constantSymbol) {
+                variableType = constantSymbol.constantType();
+            } else {
+                context.reporter().report(
+                    Report.builder()
+                        .kind(Report.Kind.VARIABLE_OR_CONSTANT_EXPECTED)
+                        .selection(variable.selection())
+                );
+            }
         } else {
             context.reporter().report(
                 Report.builder()
                     .kind(Report.Kind.UNDEFINED_VARIABLE)
                     .selection(variable.selection())
             );
-
-            return InvalidInstanceType.INSTANCE;
         }
 
         context.programBuilder()
             .instruction(new LoadInstruction(variableName));
 
-        return type;
+        return variableType;
     }
 
     private static final Map<Class<?>, InstanceType<?>> literalInstanceTypeMap = new HashMap<>() {

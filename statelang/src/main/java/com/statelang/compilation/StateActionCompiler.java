@@ -1,7 +1,9 @@
 package com.statelang.compilation;
 
 import com.statelang.ast.*;
-import com.statelang.compilation.result.*;
+import com.statelang.compilation.instruction.*;
+import com.statelang.compilation.symbol.ConstantSymbol;
+import com.statelang.compilation.symbol.VariableSymbol;
 import com.statelang.diagnostics.Report;
 import com.statelang.model.*;
 import com.statelang.tokenization.SourceLocation;
@@ -95,41 +97,44 @@ final class StateActionCompiler {
     {
         var variableName = assignmentAction.variableName();
 
-        var isVariableDefined = context.variables().containsKey(variableName);
+        var programBuilder = context.programBuilder();
+        var symbols = programBuilder.definedSymbols();
 
-        boolean isConstant = false;
+        InstanceType<?> expectedType = UnknownInstanceType.INSTANCE;
 
-        if (!isVariableDefined) {
-            if (isConstant = context.constants().containsKey(variableName)) {
-                context.reporter().report(
-                    Report.builder()
-                        .kind(Report.Kind.CONSTANT_ASSIGNMENT)
-                        .selection(assignmentAction.variableToken().selection())
-                );
+        if (symbols.containsKey(variableName)) {
+            var symbol = symbols.get(variableName);
+            if (symbol instanceof VariableSymbol variableSymbol) {
+                expectedType = variableSymbol.variableType();
             } else {
                 context.reporter().report(
                     Report.builder()
-                        .kind(Report.Kind.UNDEFINED_VARIABLE)
+                        .kind(
+                            symbol instanceof ConstantSymbol
+                                ? Report.Kind.CONSTANT_ASSIGNMENT
+                                : Report.Kind.VARIABLE_EXPECTED
+                        )
                         .selection(assignmentAction.variableToken().selection())
                 );
             }
+        } else {
+            context.reporter().report(
+                Report.builder()
+                    .kind(Report.Kind.UNDEFINED_VARIABLE)
+                    .selection(assignmentAction.variableToken().selection())
+            );
         }
-
-        var programBuilder = context.programBuilder();
 
         programBuilder.instruction(
             new SourceLocationInstruction(assignmentAction.variableToken().selection().start())
         );
 
         var valueType = ValueExpressionCompiler.compile(context, assignmentAction.newVariableValue());
-
-        if (isConstant || valueType == InvalidInstanceType.INSTANCE) {
+        if (valueType == UnknownInstanceType.INSTANCE) {
             return;
         }
 
-        var expectedType = context.variables().get(variableName);
-
-        if (valueType != expectedType) {
+        if (expectedType != UnknownInstanceType.INSTANCE && valueType != expectedType) {
             context.reporter().report(
                 Report.builder()
                     .kind(Report.Kind.TYPE_ERROR)
@@ -152,7 +157,7 @@ final class StateActionCompiler {
 
         var conditionType = ValueExpressionCompiler.compile(context, conditionalAction.condition());
 
-        if (conditionType != InvalidInstanceType.INSTANCE && conditionType != BooleanInstanceType.INSTANCE) {
+        if (conditionType != UnknownInstanceType.INSTANCE && conditionType != BooleanInstanceType.INSTANCE) {
             context.reporter().report(
                 Report.builder()
                     .kind(Report.Kind.TYPE_ERROR)
@@ -192,7 +197,7 @@ final class StateActionCompiler {
 
         var conditionType = ValueExpressionCompiler.compile(context, assertionAction.condition());
 
-        if (conditionType != InvalidInstanceType.INSTANCE && conditionType != BooleanInstanceType.INSTANCE) {
+        if (conditionType != UnknownInstanceType.INSTANCE && conditionType != BooleanInstanceType.INSTANCE) {
             context.reporter().report(
                 Report.builder()
                     .kind(Report.Kind.TYPE_ERROR)

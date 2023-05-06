@@ -1,16 +1,17 @@
 package com.statelang.compilation;
 
-import java.util.stream.Stream;
-
 import com.statelang.ast.ConstantDefinition;
 import com.statelang.ast.Definition;
 import com.statelang.ast.InStateDefinition;
 import com.statelang.ast.StateDefinition;
 import com.statelang.ast.VariableDefinition;
-import com.statelang.compilation.result.JumpToInstruction;
-import com.statelang.compilation.result.LabelInstruction;
-import com.statelang.compilation.result.SourceLocationInstruction;
-import com.statelang.compilation.result.StoreInstruction;
+import com.statelang.compilation.instruction.JumpToInstruction;
+import com.statelang.compilation.instruction.LabelInstruction;
+import com.statelang.compilation.instruction.SourceLocationInstruction;
+import com.statelang.compilation.instruction.StoreInstruction;
+import com.statelang.compilation.symbol.ConstantSymbol;
+import com.statelang.compilation.symbol.StateSymbol;
+import com.statelang.compilation.symbol.VariableSymbol;
 import com.statelang.diagnostics.Report;
 import com.statelang.tokenization.SourceSelection;
 
@@ -46,6 +47,7 @@ final class DefinitionCompiler {
 
     private static void compileStateDefinition(CompilationContext context, StateDefinition stateDefinition) {
         var stateMachineBuilder = context.stateMachineBuilder();
+        var programBuilder = context.programBuilder();
         var states = stateDefinition.states();
 
         if (!stateMachineBuilder.definedStates().isEmpty()) {
@@ -64,7 +66,10 @@ final class DefinitionCompiler {
             );
         }
 
-        states.forEach(stateMachineBuilder::state);
+        states.forEach(state -> {
+            stateMachineBuilder.state(state);
+            programBuilder.symbol(new StateSymbol(state));
+        });
 
         stateMachineBuilder.initialState(states.get(0));
     }
@@ -109,7 +114,7 @@ final class DefinitionCompiler {
     private static void compileVariableDefinition(CompilationContext context, VariableDefinition definition) {
         var variableName = definition.variableName();
 
-        checkDuplicateIdentifier(context, variableName, definition.variableNameToken().selection());
+        checkDuplicateSymbol(context, variableName, definition.variableNameToken().selection());
 
         var programBuilder = context.programBuilder();
 
@@ -119,15 +124,15 @@ final class DefinitionCompiler {
 
         var expressionType = ValueExpressionCompiler.compile(context, definition.initialVariableValue());
 
-        context.variables().put(variableName, expressionType);
-
-        programBuilder.instruction(new StoreInstruction(variableName));
+        programBuilder
+            .symbol(new VariableSymbol(variableName, expressionType))
+            .instruction(new StoreInstruction(variableName));
     }
 
     private static void compileConstantDefinition(CompilationContext context, ConstantDefinition definition) {
         var constantName = definition.constantName();
 
-        checkDuplicateIdentifier(context, constantName, definition.constantNameToken().selection());
+        checkDuplicateSymbol(context, constantName, definition.constantNameToken().selection());
 
         var programBuilder = context.programBuilder();
 
@@ -137,25 +142,19 @@ final class DefinitionCompiler {
 
         var expressionType = ValueExpressionCompiler.compile(context, definition.initialConstantValue());
 
-        context.constants().put(constantName, expressionType);
-
-        programBuilder.instruction(new StoreInstruction(constantName));
+        programBuilder
+            .symbol(new ConstantSymbol(constantName, expressionType))
+            .instruction(new StoreInstruction(constantName));
     }
 
-    private static void checkDuplicateIdentifier(
+    private static void checkDuplicateSymbol(
         CompilationContext context,
         String identifier,
         SourceSelection identifierSelection)
     {
-        var identifiers = Stream.concat(
-            Stream.concat(
-                context.variables().keySet().stream(),
-                context.constants().keySet().stream()
-            ),
-            context.stateMachineBuilder().definedStates().stream()
-        );
+        var symbols = context.programBuilder().definedSymbols();
 
-        if (identifiers.anyMatch(identifier::equals)) {
+        if (symbols.containsKey(identifier)) {
             context.reporter().report(
                 Report.builder()
                     .kind(Report.Kind.DUPLICATE_IDENTIFIER)

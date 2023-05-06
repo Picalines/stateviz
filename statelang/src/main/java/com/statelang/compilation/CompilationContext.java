@@ -1,10 +1,6 @@
 package com.statelang.compilation;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.statelang.diagnostics.Reporter;
-import com.statelang.model.InstanceType;
 import com.statelang.model.StateMachine;
 
 import lombok.Builder;
@@ -27,10 +23,4 @@ final class CompilationContext {
     @Setter
     @Builder.Default
     private String currentState = null;
-
-    @Getter
-    private final Map<String, InstanceType<?>> constants = new HashMap<>();
-
-    @Getter
-    private final Map<String, InstanceType<?>> variables = new HashMap<>();
 }
