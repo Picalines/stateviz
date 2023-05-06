@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.base.Suppliers;
 import com.statelang.ast.*;
-import com.statelang.compilation.result.JumpToInstruction;
+import com.statelang.compilation.instruction.JumpToInstruction;
 import com.statelang.diagnostics.Report;
 import com.statelang.diagnostics.Reporter;
 import com.statelang.model.StateMachine;

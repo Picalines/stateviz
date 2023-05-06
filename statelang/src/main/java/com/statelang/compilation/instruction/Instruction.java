@@ -1,4 +1,4 @@
-package com.statelang.compilation.result;
+package com.statelang.compilation.instruction;
 
 import lombok.Getter;
 
