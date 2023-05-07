@@ -12,7 +12,14 @@
 	let container: HTMLDivElement | null = null;
 	let network: vis.Network | null = null;
 
-	const nodes = new vis.DataSet<{ id: string; label: string }>();
+	const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+
+	const nodes = new vis.DataSet<{
+		id: string;
+		label: string;
+		margin: { top: number; right: number; bottom: number; left: number };
+	}>();
+
 	const edges = new vis.DataSet<{
 		id: undefined;
 		from: string;
@@ -34,7 +41,7 @@
 
 		for (const state of states) {
 			if (nodes.get(state) === null) {
-				nodes.add({ id: state, label: state });
+				nodes.add({ id: state, label: state, margin });
 			}
 		}
 

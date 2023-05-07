@@ -19,25 +19,25 @@ export type SourceSelection = {
 export type Report = {
 	selection: SourceSelection;
 	kind:
-		| 'INVALID_TOKEN'
-		| 'UNEXPECTED_TOKEN'
-		| 'UNEXPECTED_END_OF_INPUT'
-		| 'END_OF_INPUT_EXPECTED'
-		| 'VALUE_EXPRESSION_EXPECTED'
-		| 'CONDITION_EXPECTED'
-		| 'VARIABLE_EXPECTED'
-		| 'VARIABLE_OR_CONSTANT_EXPECTED'
-		| 'AMBIGUOUS_DEFINITION'
-		| 'MISSING_STATE_DEFINITION'
-		| 'TOO_LITTLE_STATES'
-		| 'DUPLICATE_IDENTIFIER'
-		| 'UNDEFINED_OPERATOR'
-		| 'UNDEFINED_VARIABLE'
-		| 'UNDEFINED_STATE'
-		| 'CONSTANT_ASSIGNMENT'
-		| 'TYPE_ERROR'
-		| 'UNREACHABLE_CODE'
-		| 'UNREACHABLE_STATE';
+	| 'INVALID_TOKEN'
+	| 'UNEXPECTED_TOKEN'
+	| 'UNEXPECTED_END_OF_INPUT'
+	| 'END_OF_INPUT_EXPECTED'
+	| 'VALUE_EXPRESSION_EXPECTED'
+	| 'CONDITION_EXPECTED'
+	| 'VARIABLE_EXPECTED'
+	| 'VARIABLE_OR_CONSTANT_EXPECTED'
+	| 'AMBIGUOUS_DEFINITION'
+	| 'MISSING_STATE_DEFINITION'
+	| 'TOO_LITTLE_STATES'
+	| 'DUPLICATE_IDENTIFIER'
+	| 'UNDEFINED_OPERATOR'
+	| 'UNDEFINED_VARIABLE'
+	| 'UNDEFINED_STATE'
+	| 'CONSTANT_ASSIGNMENT'
+	| 'TYPE_ERROR'
+	| 'UNREACHABLE_CODE'
+	| 'UNREACHABLE_STATE';
 	info: string | null;
 	severity: 'INFO' | 'WARNING' | 'ERROR';
 	unexpectedTokenKind: string | null;
@@ -105,8 +105,10 @@ export type CompilationResult = {
 
 export async function compileSource(sourceText: SourceText): Promise<Optional<CompilationResult>> {
 	try {
+		const host = import.meta.env.DEV ? 'localhost:8080' : location.host;
+
 		const response = await axios.post<CompilationResult>(
-			`http://${location.host}/statelang/compile`,
+			`http://${host}/statelang/compile`,
 			sourceText,
 		);
 		return Optional.some(response.data);
