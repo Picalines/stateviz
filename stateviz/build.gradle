@@ -48,6 +48,10 @@ task buildFrontend(type: Exec) {
     commandLine npmCmd, 'run', 'build'
 }
 
+bootRun {
+  args = ["--spring.profiles.active=dev"]
+}
+
 tasks.named('test') {
     useJUnitPlatform()
 }

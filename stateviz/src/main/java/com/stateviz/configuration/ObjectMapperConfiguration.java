@@ -1,4 +1,4 @@
-package com.stateviz.beans;
+package com.stateviz.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
