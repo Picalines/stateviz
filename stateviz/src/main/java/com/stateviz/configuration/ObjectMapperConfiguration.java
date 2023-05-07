@@ -18,7 +18,7 @@ public class ObjectMapperConfiguration {
 
     @Bean
     ObjectMapper objectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
+        var mapper = new ObjectMapper();
 
         mapper.registerModule(new Jdk8Module());
 

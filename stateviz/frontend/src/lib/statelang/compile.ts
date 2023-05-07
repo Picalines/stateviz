@@ -111,6 +111,7 @@ export async function compileSource(sourceText: SourceText): Promise<Optional<Co
 			`http://${host}/statelang/compile`,
 			sourceText,
 		);
+
 		return Optional.some(response.data);
 	} catch {
 		return Optional.none();
