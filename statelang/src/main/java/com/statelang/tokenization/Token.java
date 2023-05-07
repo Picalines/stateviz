@@ -26,7 +26,7 @@ public final class Token {
 
 		LITERAL_NUMBER("number literal", "\\d+(\\.\\d+)?|\\.\\d+"),
 		LITERAL_BOOLEAN("boolean literal", "\\b(true|false)\\b"),
-		LITERAL_STRING("string literal", "'.*?'"),
+		LITERAL_STRING("string literal", "\".*?\""),
 
 		KEYWORD_STATE("'state'", "\\bstate\\b"),
 		KEYWORD_ASSERT("'assert'", "\\bassert\\b"),

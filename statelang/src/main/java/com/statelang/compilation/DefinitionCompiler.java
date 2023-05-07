@@ -80,13 +80,12 @@ final class DefinitionCompiler {
         var stateMachineBuilder = context.stateMachineBuilder();
         var state = inStateDefinition.state();
 
-        var isStateDefined = stateMachineBuilder.definedStates().contains(state);
-
-        if (!isStateDefined) {
+        if (!stateMachineBuilder.definedStates().contains(state)) {
             context.reporter().report(
                 Report.builder()
                     .kind(Report.Kind.UNDEFINED_STATE)
                     .selection(inStateDefinition.stateToken().selection())
+                    .info(state)
             );
         }
 
@@ -161,6 +160,7 @@ final class DefinitionCompiler {
                 Report.builder()
                     .kind(Report.Kind.DUPLICATE_IDENTIFIER)
                     .selection(identifierSelection)
+                    .info(identifier)
             );
         }
     }

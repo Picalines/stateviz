@@ -176,7 +176,7 @@ class TokenReaderTests {
 
     @Test
     void stringLiteralOverKeyword() {
-        var reader = createReader("'state'", new Reporter());
+        var reader = createReader("\"state\"", new Reporter());
 
         assertFalse(reader.tryAdvance());
         assertNotNull(reader.currentToken());

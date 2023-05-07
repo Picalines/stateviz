@@ -11,6 +11,7 @@ import com.statelang.compilation.instruction.*;
 import com.statelang.compilation.symbol.*;
 import com.statelang.diagnostics.Report;
 import com.statelang.model.InstanceType;
+import com.statelang.tokenization.Token;
 
 @Configuration
 public class ObjectMapperConfiguration {
@@ -25,6 +26,7 @@ public class ObjectMapperConfiguration {
         mapper.addMixIn(Instruction.class, InstructionMixin.class);
         mapper.addMixIn(Symbol.class, SymbolMixin.class);
         mapper.addMixIn(Report.class, ReportMixin.class);
+        mapper.addMixIn(Token.Kind.class, TokenKindMixin.class);
 
         mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 
@@ -64,5 +66,10 @@ public class ObjectMapperConfiguration {
     private interface ReportMixin {
         @JsonProperty
         Report.Severity severity();
+    }
+
+    private interface TokenKindMixin {
+        @JsonValue
+        String description();
     }
 }
