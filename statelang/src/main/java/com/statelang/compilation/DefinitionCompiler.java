@@ -1,5 +1,10 @@
 package com.statelang.compilation;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
 import com.statelang.ast.ConstantDefinition;
 import com.statelang.ast.Definition;
 import com.statelang.ast.InStateDefinition;
@@ -49,6 +54,24 @@ final class DefinitionCompiler {
         var stateMachineBuilder = context.stateMachineBuilder();
         var programBuilder = context.programBuilder();
         var states = stateDefinition.states();
+
+        states
+            .stream()
+            .filter(state -> Collections.frequency(stateDefinition.states(), state) > 1)
+            .distinct()
+            .forEach(state -> {
+                context.reporter().report(
+                    Report.builder()
+                        .kind(Report.Kind.DUPLICATE_IDENTIFIER)
+                        .selection(stateDefinition.stateToken().selection())
+                        .info(state)
+                );
+            });
+
+        states = states
+            .stream()
+            .distinct()
+            .toList();
 
         if (!stateMachineBuilder.definedStates().isEmpty()) {
             context.reporter().report(
