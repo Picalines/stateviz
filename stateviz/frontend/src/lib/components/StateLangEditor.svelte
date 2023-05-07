@@ -15,6 +15,7 @@
 		language: statelangId,
 		automaticLayout: true,
 		minimap: { enabled: false },
+		theme: 'vs-dark',
 	};
 </script>
 

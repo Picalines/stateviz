@@ -28,12 +28,20 @@
 	}>();
 
 	onMount(() => {
-		if (container) {
-			const options: vis.Options = {
-				nodes: { shape: 'box' },
-			};
-			network = new vis.Network(container, { nodes, edges }, options);
-		}
+        network = new vis.Network(
+            container!,
+            { nodes, edges },
+            {
+                nodes: {
+                    shape: 'box',
+                    borderWidth: 2,
+                    color: {
+                        background: 'white',
+                        border: 'grey',
+                    },
+                },
+            },
+        );
 	});
 
 	$: if (network) {

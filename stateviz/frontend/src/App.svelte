@@ -44,7 +44,7 @@
 </script>
 
 <main>
-	<StateLangEditor bind:value={program} {markers} style="flex: 1" />
+	<StateLangEditor bind:value={program} {markers} style="flex: 1; width: 50%" />
 	{#if stateMachine}
 		<StateGraph {stateMachine} style="flex: 1" />
 	{:else}
