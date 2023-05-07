@@ -1,9 +1,6 @@
 package com.statelang.compilation;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.stream.Collectors;
 
 import com.statelang.ast.ConstantDefinition;
 import com.statelang.ast.Definition;

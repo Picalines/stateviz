@@ -1,8 +1,11 @@
 <script lang="ts">
+	import type * as monaco from 'monaco-editor';
+	import StateGraph from './lib/components/StateGraph.svelte';
 	import StateLangEditor from './lib/components/StateLangEditor.svelte';
-	import { dedent } from './lib/utils';
+	import { compileSource, reportToMarkerData, type StateMachine } from './lib/statelang';
+	import { debounce, dedent } from './lib/utils';
 
-	const initialProgram = dedent(`
+	let program = dedent(`
 		state {
 			COUNTING,
 			STOPPED,
@@ -21,8 +24,38 @@
 			assert count < stop;
 		}
 		`);
+
+	let markers: monaco.editor.IMarkerData[] = [];
+
+	let stateMachine: StateMachine | null = null;
+
+	const recompile = debounce(async () => {
+		const result = (await compileSource({ descriptor: 'input', text: program })).orElse(null);
+		if (!result) {
+			return;
+		}
+
+		stateMachine = result.program?.stateMachine ?? null;
+
+		markers = result.reports.map(reportToMarkerData);
+	}, 500);
+
+	$: program, (markers = []), recompile();
 </script>
 
 <main>
-	<StateLangEditor value={initialProgram} />
+	<StateLangEditor bind:value={program} {markers} style="flex: 1" />
+	{#if stateMachine}
+		<StateGraph {stateMachine} style="flex: 1" />
+	{:else}
+		<div style:flex="1" />
+	{/if}
 </main>
+
+<style>
+	main {
+		display: flex;
+		flex-direction: row;
+		height: 100vh;
+	}
+</style>

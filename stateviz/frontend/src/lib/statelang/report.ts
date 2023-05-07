@@ -1,5 +1,6 @@
 import { joinWithLast } from '../utils';
 import type { Report } from './compile';
+import * as monaco from 'monaco-editor';
 
 const REPORT_MESSAGE_MAP: Record<Report['kind'], (report: Report) => string> = {
 	INVALID_TOKEN: report => 'invalid token',
@@ -26,7 +27,7 @@ const REPORT_MESSAGE_MAP: Record<Report['kind'], (report: Report) => string> = {
 	UNREACHABLE_STATE: report => `state ${report.info} is unreachable`,
 };
 
-export function humanReportMessage(report: Report): string {
+function humanReportMessage(report: Report): string {
 	const lines = [REPORT_MESSAGE_MAP[report.kind](report)];
 
 	if (report.unexpectedTokenKind) {
@@ -38,4 +39,23 @@ export function humanReportMessage(report: Report): string {
 	}
 
 	return lines.map((line, i) => (i > 0 ? ' - ' + line : line)).join('\n');
+}
+
+const MARKER_SEVERITY_MAP: Record<Report['severity'], monaco.MarkerSeverity> = {
+	INFO: monaco.MarkerSeverity.Info,
+	WARNING: monaco.MarkerSeverity.Warning,
+	ERROR: monaco.MarkerSeverity.Error,
+};
+
+export function reportToMarkerData(report: Report): monaco.editor.IMarkerData {
+	return {
+		startLineNumber: report.selection.start.line,
+		startColumn: report.selection.start.column,
+		endLineNumber: report.selection.end.line,
+		endColumn: report.selection.end.column + 1,
+
+		severity: MARKER_SEVERITY_MAP[report.severity],
+
+		message: humanReportMessage(report),
+	};
 }

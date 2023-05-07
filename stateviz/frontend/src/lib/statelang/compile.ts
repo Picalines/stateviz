@@ -100,7 +100,7 @@ export type CompiledProgram = {
 
 export type CompilationResult = {
 	reports: readonly Report[];
-	program: CompilationResult | null;
+	program: CompiledProgram | null;
 };
 
 export async function compileSource(sourceText: SourceText): Promise<Optional<CompilationResult>> {
