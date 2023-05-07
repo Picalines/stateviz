@@ -7,9 +7,9 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Accessors(fluent = true)
 public enum UnaryOperator {
-    PLUS("+", "+{0}"),
-    MINUS("-", "-{0}"),
-    NOT("not", "not {0}");
+    PLUS("+", "+%s"),
+    MINUS("-", "-%s"),
+    NOT("not", "not %s");
 
     @Getter
     private String description;

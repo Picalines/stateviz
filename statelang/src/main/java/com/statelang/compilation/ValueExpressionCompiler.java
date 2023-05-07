@@ -20,6 +20,10 @@ import lombok.NoArgsConstructor;
 final class ValueExpressionCompiler {
 
     public static InstanceType<?> compile(CompilationContext context, ValueExpressionNode expressionNode) {
+        if (expressionNode instanceof InvalidValueNode) {
+            return UnknownInstanceType.INSTANCE;
+        }
+
         if (expressionNode instanceof LiteralValueNode literal) {
             return compileLiteralNode(context, literal);
         }
@@ -59,6 +63,7 @@ final class ValueExpressionCompiler {
                 Report.builder()
                     .kind(Report.Kind.UNDEFINED_OPERATOR)
                     .selection(expressionSelection)
+                    .info(binaryExpression.operator().format(leftType.name(), rightType.name()))
             );
 
             return UnknownInstanceType.INSTANCE;
@@ -87,6 +92,7 @@ final class ValueExpressionCompiler {
                 Report.builder()
                     .kind(Report.Kind.UNDEFINED_OPERATOR)
                     .selection(expressionSelection)
+                    .info(unaryExpression.operator().format(rightType.name()))
             );
 
             return UnknownInstanceType.INSTANCE;

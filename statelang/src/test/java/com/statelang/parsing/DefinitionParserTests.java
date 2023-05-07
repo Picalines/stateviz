@@ -49,7 +49,7 @@ class DefinitionParserTests {
                     Optional.of(
                         new ConstantDefinition(
                             new Token(null, Token.Kind.IDENTIFIER, "x"),
-                            InvalidValueNode.instance
+                            new InvalidValueNode(null)
                         )
                     )
                 );
@@ -96,7 +96,7 @@ class DefinitionParserTests {
                     Optional.of(
                         new VariableDefinition(
                             new Token(null, Token.Kind.IDENTIFIER, "x"),
-                            InvalidValueNode.instance
+                            new InvalidValueNode(null)
                         )
                     )
                 );
