@@ -55,7 +55,7 @@ class ValueExpressionParserTests {
 
         @Test
         void stringLiteral() {
-            assertThat(assertParsesWithoutErrors("'success'", ValueExpressionParser.lambda))
+            assertThat(assertParsesWithoutErrors("\"success\"", ValueExpressionParser.lambda))
                 .usingRecursiveComparison()
                 .ignoringFieldsOfTypes(Token.class)
                 .isEqualTo(
@@ -81,7 +81,7 @@ class ValueExpressionParserTests {
                 )
             );
 
-        assertThat(assertParsesWithoutErrors("1 - 'str' + 3", ValueExpressionParser.lambda))
+        assertThat(assertParsesWithoutErrors("1 - \"str\" + 3", ValueExpressionParser.lambda))
             .usingRecursiveComparison()
             .ignoringFieldsOfTypes(Token.class)
             .isEqualTo(

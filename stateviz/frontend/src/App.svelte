@@ -1,13 +1,6 @@
 <script lang="ts">
-	import StateLangEditor from './lib/monaco/StateLangEditor.svelte';
-
-	const dedent = (str: string) => {
-		const lines = str.split('\n').slice(1, -1);
-		const minIndent = Math.min(
-			...lines.map(line => line.length - line.trimStart().length).filter(indent => indent > 0),
-		);
-		return lines.map(line => line.slice(minIndent)).join('\n');
-	};
+	import StateLangEditor from './lib/components/StateLangEditor.svelte';
+	import { dedent } from './lib/utils';
 
 	const initialProgram = dedent(`
 		state {

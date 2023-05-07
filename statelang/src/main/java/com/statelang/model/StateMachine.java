@@ -55,6 +55,8 @@ public final class StateMachine {
         }
 
         public StateMachineBuilder transition(String from, String to) {
+            Preconditions.checkArgument(from != null, "from is null");
+            Preconditions.checkArgument(to != null, "to is null");
             Preconditions.checkState(states.contains(from), "undefined from state");
             Preconditions.checkState(states.contains(to), "undefined to state");
 

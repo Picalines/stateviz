@@ -73,15 +73,21 @@ final class StateActionCompiler {
         var newState = transitionAction.newState();
         var stateMachineBuilder = context.stateMachineBuilder();
 
-        if (!stateMachineBuilder.definedStates().contains(newState)) {
+        var definedStates = stateMachineBuilder.definedStates();
+
+        if (definedStates.contains(newState)) {
+            var currentState = context.currentState();
+            if (definedStates.contains(currentState)) {
+                stateMachineBuilder.transition(currentState, newState);
+            }
+        } else {
             context.reporter().report(
                 Report.builder()
                     .kind(Report.Kind.UNDEFINED_STATE)
                     .selection(transitionAction.newStateToken().selection())
+                    .info(newState)
             );
         }
-
-        stateMachineBuilder.transition(context.currentState(), newState);
 
         context.programBuilder()
             .instruction(
@@ -122,6 +128,7 @@ final class StateActionCompiler {
                 Report.builder()
                     .kind(Report.Kind.UNDEFINED_VARIABLE)
                     .selection(assignmentAction.variableToken().selection())
+                    .info(variableName)
             );
         }
 
@@ -139,6 +146,7 @@ final class StateActionCompiler {
                 Report.builder()
                     .kind(Report.Kind.TYPE_ERROR)
                     .selection(assignmentAction.newVariableValue().selection())
+                    .info(valueType.name() + " " + expectedType.name())
             );
         }
 
@@ -162,6 +170,7 @@ final class StateActionCompiler {
                 Report.builder()
                     .kind(Report.Kind.TYPE_ERROR)
                     .selection(conditionalAction.condition().selection())
+                    .info(conditionType.name() + " " + BooleanInstanceType.INSTANCE.name())
             );
         }
 
@@ -202,6 +211,7 @@ final class StateActionCompiler {
                 Report.builder()
                     .kind(Report.Kind.TYPE_ERROR)
                     .selection(assertionAction.condition().selection())
+                    .info(conditionType.name() + " " + BooleanInstanceType.INSTANCE.name())
             );
         }
 

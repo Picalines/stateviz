@@ -131,6 +131,7 @@ final class ValueExpressionCompiler {
                 Report.builder()
                     .kind(Report.Kind.UNDEFINED_VARIABLE)
                     .selection(variable.selection())
+                    .info(variableName)
             );
         }
 
