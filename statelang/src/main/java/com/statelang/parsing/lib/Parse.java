@@ -7,11 +7,11 @@ import java.util.function.Supplier;
 
 import com.google.common.base.Preconditions;
 import com.statelang.diagnostics.Report;
+import com.statelang.tokenization.SourceSelection;
 import com.statelang.tokenization.Token;
 
 public final class Parse {
-    private Parse() {
-    }
+    private Parse() {}
 
     public static <T> Parser<T> success(Supplier<T> valueSupplier) {
         Preconditions.checkArgument(valueSupplier != null, "valueSupplier is null");
@@ -30,6 +30,15 @@ public final class Parse {
     public static <T> Parser<T> error(Report.Kind reportKind) {
         Preconditions.checkArgument(reportKind != null, "reportKind is null");
         return ErrorParser.of(reportKind);
+    }
+
+    public static Parser<SourceSelection> currentSelection() {
+        return new Parser<SourceSelection>() {
+            @Override
+            public ParserResult<SourceSelection> parse(ParserContext context) {
+                return ParserResult.fromValue(context.reader().selection());
+            }
+        };
     }
 
     public static Parser<Token> token(Token.Kind tokenKind) {
@@ -112,7 +121,8 @@ public final class Parse {
         Parser<TTerm> firstTermParser,
         Parser<TTerm> restTermsParser,
         Parser<TOperator> operatorParser,
-        ChainOperatorApplier<TOperator, TTerm> apply) {
+        ChainOperatorApplier<TOperator, TTerm> apply)
+    {
         Preconditions.checkArgument(firstTermParser != null, "firstTermParser is null");
         Preconditions.checkArgument(restTermsParser != null, "restTermsParser is null");
         Preconditions.checkArgument(operatorParser != null, "operatorParser is null");
@@ -124,7 +134,8 @@ public final class Parse {
     public static <TTerm, TOperator> Parser<TTerm> chain(
         Parser<TTerm> termParser,
         Parser<TOperator> operatorParser,
-        ChainOperatorApplier<TOperator, TTerm> apply) {
+        ChainOperatorApplier<TOperator, TTerm> apply)
+    {
         return chain(termParser, termParser, operatorParser, apply);
     }
 

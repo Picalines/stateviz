@@ -43,10 +43,9 @@ public final class ValueExpressionParser {
             variable,
             innerExpression
         )
-            .recover(InvalidValueNode.instance);
+            .recover(Parse.currentSelection().map(InvalidValueNode::new));
 
-        record TokenOperatorPair(Token token, UnaryOperator operator) {
-        }
+        record TokenOperatorPair(Token token, UnaryOperator operator) {}
 
         var signedTerm = Parse.oneOf(
             Parse.token(OPERATOR_PLUS).map(token -> new TokenOperatorPair(token, UnaryOperator.PLUS)),

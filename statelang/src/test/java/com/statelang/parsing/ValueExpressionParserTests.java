@@ -8,6 +8,7 @@ import com.statelang.ast.StringLiteralValue;
 import com.statelang.ast.UnaryValueExpressionNode;
 import com.statelang.model.BinaryOperator;
 import com.statelang.model.UnaryOperator;
+import com.statelang.tokenization.SourceSelection;
 import com.statelang.tokenization.Token;
 
 import org.junit.jupiter.api.Nested;
@@ -118,12 +119,12 @@ class ValueExpressionParserTests {
     void invalid() {
         assertThat(assertParsesWithErrors("() * 2", ValueExpressionParser.lambda))
             .usingRecursiveComparison()
-            .ignoringFieldsOfTypes(Token.class)
+            .ignoringFieldsOfTypes(Token.class, SourceSelection.class)
             .isEqualTo(
                 Optional.of(
                     new BinaryValueExpressionNode(
                         BinaryOperator.MULTIPLY,
-                        InvalidValueNode.instance,
+                        new InvalidValueNode(null),
                         new NumberLiteralValue(null, 2)
                     )
                 )
@@ -131,7 +132,7 @@ class ValueExpressionParserTests {
 
         assertThat(assertParsesWithErrors("2 + (1 -)", ValueExpressionParser.lambda))
             .usingRecursiveComparison()
-            .ignoringFieldsOfTypes(Token.class)
+            .ignoringFieldsOfTypes(Token.class, SourceSelection.class)
             .isEqualTo(
                 Optional.of(
                     new BinaryValueExpressionNode(
@@ -140,7 +141,7 @@ class ValueExpressionParserTests {
                         new BinaryValueExpressionNode(
                             BinaryOperator.MINUS,
                             new NumberLiteralValue(null, 1),
-                            InvalidValueNode.instance
+                            new InvalidValueNode(null)
                         )
                     )
                 )
