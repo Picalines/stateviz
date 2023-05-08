@@ -44,7 +44,7 @@ task buildFrontend(type: Exec) {
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         npmCmd = 'npm.cmd'
     }
-    workingDir './frontend'
+    workingDir './src/main/frontend'
     commandLine npmCmd, 'run', 'build'
 }
 
