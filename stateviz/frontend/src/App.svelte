@@ -7,6 +7,7 @@
 		reportToMarkerData,
 		type StateMachine,
 		type Symbol as StateLangSymbol,
+		Interpreter,
 	} from './lib/statelang';
 	import { debounce, dedent } from './lib/utils';
 
@@ -35,25 +36,38 @@
 	let markers: monaco.editor.IMarkerData[] = [];
 	let symbols: StateLangSymbol[] = [];
 
+	let interpreter: Interpreter | null = null;
+
+	let compiling = false;
+	let isCompiledSuccessfully = false;
+
 	const recompile = debounce(async () => {
-		(await compileSource({ descriptor: 'input', text: program })).ifSome(result => {
-			if (result.program) {
-				stateMachine = result.program?.stateMachine ?? null;
-				symbols = Object.values(result.program?.symbols ?? {});
+		(await compileSource({ descriptor: 'input', text: program })).ifSome(({ reports, program }) => {
+			if (program) {
+				stateMachine = program.stateMachine ?? null;
+				symbols = Object.values(program.symbols ?? {});
+				interpreter = new Interpreter(program);
+				isCompiledSuccessfully = true;
 			}
-			markers = result.reports.map(reportToMarkerData);
+
+			markers = reports.map(reportToMarkerData);
 		});
+		compiling = false;
 	}, 500);
 
-	$: program, (markers = []), recompile();
+	$: {
+		program;
+		markers = [];
+		isCompiledSuccessfully = false;
+		compiling = true;
+		recompile();
+	}
 </script>
 
 <main>
 	<StateLangEditor {markers} {symbols} style="flex: 1; width: 50%" bind:value={program} />
 	{#if stateMachine}
-		<StateGraph {stateMachine} style="flex: 1" />
-	{:else}
-		<div style:flex="1" />
+		<StateGraph {stateMachine} isUpToDate={compiling || isCompiledSuccessfully} style="flex: 1" />
 	{/if}
 </main>
 

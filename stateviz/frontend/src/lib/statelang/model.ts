@@ -92,6 +92,7 @@ export type Symbol = { id: string } & TypedObject<{
 export type CompiledProgram = {
 	stateMachine: StateMachine;
 	instructions: Instruction[];
+    jumpTable: Record<string, number>;
 	symbols: Record<string, Symbol>;
 };
 
