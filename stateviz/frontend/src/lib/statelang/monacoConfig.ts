@@ -1,15 +1,18 @@
 import * as monaco from 'monaco-editor';
+import { stateLangSyntax } from './model';
 
 export const statelangId = 'statelang';
 
 monaco.languages.register({ id: statelangId });
 
 monaco.languages.setMonarchTokensProvider(statelangId, {
-	keywords: ['state', 'let', 'const', 'when', 'assert', 'if', 'else'],
+	keywords: stateLangSyntax.keywords,
 
-	operators: [':=', '!=', '=', '+', '-', '*', '/', '%'],
+	operators: stateLangSyntax.operators,
 
-	operatorSymbols: /[=>+\-*\/%:]+/,
+	operatorSymbols: new RegExp(
+		`[${[...new Set(stateLangSyntax.operators.join(''))].join('').replaceAll('-', '\\-')}]+`,
+	),
 
 	tokenizer: {
 		root: [

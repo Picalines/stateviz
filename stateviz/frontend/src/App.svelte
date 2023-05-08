@@ -2,7 +2,12 @@
 	import type * as monaco from 'monaco-editor';
 	import StateGraph from './lib/components/StateGraph.svelte';
 	import StateLangEditor from './lib/components/StateLangEditor.svelte';
-	import { compileSource, reportToMarkerData, type StateMachine } from './lib/statelang';
+	import {
+		compileSource,
+		reportToMarkerData,
+		type StateMachine,
+		type Symbol as StateLangSymbol,
+	} from './lib/statelang';
 	import { debounce, dedent } from './lib/utils';
 
 	let program = dedent(`
@@ -25,26 +30,26 @@
 		}
 		`);
 
-	let markers: monaco.editor.IMarkerData[] = [];
-
 	let stateMachine: StateMachine | null = null;
 
+	let markers: monaco.editor.IMarkerData[] = [];
+	let symbols: StateLangSymbol[] = [];
+
 	const recompile = debounce(async () => {
-		const result = (await compileSource({ descriptor: 'input', text: program })).orElse(null);
-		if (!result) {
-			return;
-		}
-
-		stateMachine = result.program?.stateMachine ?? null;
-
-		markers = result.reports.map(reportToMarkerData);
+		(await compileSource({ descriptor: 'input', text: program })).ifSome(result => {
+			if (result.program) {
+				stateMachine = result.program?.stateMachine ?? null;
+				symbols = Object.values(result.program?.symbols ?? {});
+			}
+			markers = result.reports.map(reportToMarkerData);
+		});
 	}, 500);
 
 	$: program, (markers = []), recompile();
 </script>
 
 <main>
-	<StateLangEditor bind:value={program} {markers} style="flex: 1; width: 50%" />
+	<StateLangEditor {markers} {symbols} style="flex: 1; width: 50%" bind:value={program} />
 	{#if stateMachine}
 		<StateGraph {stateMachine} style="flex: 1" />
 	{:else}

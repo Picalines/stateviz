@@ -27,6 +27,9 @@ public class ObjectMapperConfiguration {
         mapper.addMixIn(Symbol.class, SymbolMixin.class);
         mapper.addMixIn(Report.class, ReportMixin.class);
         mapper.addMixIn(Token.Kind.class, TokenKindMixin.class);
+        mapper.addMixIn(StateSymbol.class, StateSymbolMixin.class);
+        mapper.addMixIn(VariableSymbol.class, VariableSymbolMixin.class);
+        mapper.addMixIn(ConstantSymbol.class, ConstantSymbolMixin.class);
 
         mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 
@@ -71,5 +74,20 @@ public class ObjectMapperConfiguration {
     private interface TokenKindMixin {
         @JsonValue
         String description();
+    }
+
+    private interface StateSymbolMixin {
+        @JsonProperty
+        String stateName();
+    }
+
+    private interface VariableSymbolMixin {
+        @JsonProperty
+        String variableName();
+    }
+
+    private interface ConstantSymbolMixin {
+        @JsonProperty
+        String constantName();
     }
 }
