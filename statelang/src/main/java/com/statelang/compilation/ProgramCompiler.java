@@ -11,6 +11,7 @@ import com.google.common.base.Suppliers;
 import com.statelang.ast.*;
 import com.statelang.compilation.instruction.ExitInstruction;
 import com.statelang.compilation.instruction.JumpToInstruction;
+import com.statelang.compilation.instruction.StateInstruction;
 import com.statelang.diagnostics.Report;
 import com.statelang.diagnostics.Reporter;
 import com.statelang.model.StateMachine;
@@ -44,9 +45,13 @@ public final class ProgramCompiler {
 
         nonInStateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
 
-        programBuilder
-            .instruction(new JumpToInstruction(stateMachineBuilder.definedInitialState()))
-            .instruction(ExitInstruction.SUCCESS);
+        var initialState = stateMachineBuilder.definedInitialState();
+        if (initialState != null) {
+            programBuilder
+                .instruction(new StateInstruction(initialState))
+                .instruction(new JumpToInstruction(initialState))
+                .instruction(ExitInstruction.SUCCESS);
+        }
 
         inStateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
 

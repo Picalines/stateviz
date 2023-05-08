@@ -93,6 +93,7 @@ final class StateActionCompiler {
             .instruction(
                 new SourceLocationInstruction(transitionAction.newStateToken().selection().start())
             )
+            .instruction(new StateInstruction(newState))
             .instruction(new JumpToInstruction(newState))
             .instruction(ExitInstruction.SUCCESS);
 

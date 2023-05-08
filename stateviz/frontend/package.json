@@ -24,6 +24,7 @@
 	},
 	"dependencies": {
 		"axios": "^1.4.0",
+		"bootstrap-icons": "^1.10.5",
 		"monaco-editor": "^0.38.0",
 		"vis-network": "^9.1.6"
 	}

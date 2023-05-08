@@ -14,12 +14,17 @@
 
 	export let value = '';
 
+	export let readOnly = false;
+
 	export let markers: monaco.editor.IMarkerData[] = [];
+
+	export let decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
 	let monacoContainer: HTMLElement;
 
 	let editor: ReturnType<typeof monaco.editor.create> | null = null;
 	let model: monaco.editor.IModel | null = null;
+	let decorationsCollection: monaco.editor.IEditorDecorationsCollection | null = null;
 
 	onMount(() => {
 		editor = monaco.editor.create(monacoContainer, options);
@@ -32,8 +37,12 @@
 		model.onDidChangeContent(() => (value = model!.getValue()));
 	});
 
-	$: if (editor && model && markers) {
+	$: if (editor && model) {
 		monaco.editor.setModelMarkers(model, 'monaco-editor', markers);
+		editor.updateOptions({ readOnly });
+
+		decorationsCollection?.clear();
+		decorationsCollection = editor.createDecorationsCollection(decorations);
 	}
 </script>
 

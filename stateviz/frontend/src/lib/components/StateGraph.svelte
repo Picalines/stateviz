@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { circOut } from 'svelte/easing';
-	import { fly } from 'svelte/transition';
 	import * as vis from 'vis-network/standalone';
 	import type { StateMachine } from '../statelang';
 
@@ -11,15 +9,21 @@
 
 	export let stateMachine: StateMachine;
 
+	export let currentState: string | null;
+
 	let container: HTMLDivElement | null = null;
 	let network: vis.Network | null = null;
 
 	const margin = { top: 10, right: 10, bottom: 10, left: 10 };
 
+	const nodeFont = { multi: 'html' };
+
 	const nodes = new vis.DataSet<{
 		id: string;
 		label: string;
 		margin: { top: number; right: number; bottom: number; left: number };
+		borderWidth: number;
+		font: typeof nodeFont;
 	}>();
 
 	const edges = new vis.DataSet<{
@@ -36,7 +40,6 @@
 			{
 				nodes: {
 					shape: 'box',
-					borderWidth: 2,
 					color: {
 						background: 'white',
 						border: 'grey',
@@ -50,9 +53,18 @@
 		const states = new Set(stateMachine.states);
 
 		for (const state of states) {
-			if (nodes.get(state) === null) {
-				nodes.add({ id: state, label: state, margin });
-			}
+			const isCurrentState = state === currentState;
+
+			nodes.update(
+				{
+					id: state,
+					label: isCurrentState ? `<b>${state}</b>` : state,
+					margin,
+					font: nodeFont,
+					borderWidth: isCurrentState ? 4 : 2,
+				},
+				state,
+			);
 		}
 
 		for (const id of nodes.getIds()) {
