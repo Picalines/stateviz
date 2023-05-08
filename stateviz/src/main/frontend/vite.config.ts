@@ -7,6 +7,6 @@ export default defineConfig({
 
 	build: {
 		emptyOutDir: true,
-		outDir: '../src/main/resources/static',
+		outDir: '../resources/static',
 	},
 });
