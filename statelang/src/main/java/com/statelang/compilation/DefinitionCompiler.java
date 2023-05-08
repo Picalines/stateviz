@@ -119,13 +119,13 @@ final class DefinitionCompiler {
                     .kind(Report.Kind.AMBIGUOUS_DEFINITION)
                     .selection(inStateDefinition.stateToken().selection())
             );
+        } else {
+            programBuilder
+                .instruction(new LabelInstruction(state))
+                .instruction(
+                    new SourceLocationInstruction(inStateDefinition.stateToken().selection().start())
+                );
         }
-
-        programBuilder
-            .instruction(new LabelInstruction(state))
-            .instruction(
-                new SourceLocationInstruction(inStateDefinition.stateToken().selection().start())
-            );
 
         context.currentState(state);
         StateActionCompiler.compile(context, inStateDefinition.actionBlock());
