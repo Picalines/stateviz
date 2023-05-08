@@ -9,7 +9,7 @@ export type CompilationResult = {
 
 export async function compileSource(sourceText: SourceText): Promise<Optional<CompilationResult>> {
 	try {
-		const host = import.meta.env.DEV ? 'localhost:8080' : location.host;
+		const host = import.meta.env.DEV ? 'localhost:8080' : (location.host || 'localhost:8080');
 
 		const response = await axios.post<CompilationResult>(
 			`http://${host}/statelang/compile`,
