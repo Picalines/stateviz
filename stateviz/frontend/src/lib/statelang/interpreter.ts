@@ -25,6 +25,7 @@ type AllPairs<Elements extends string> = {
 export type InterpretationInfo = {
 	get memory(): ReadonlyMap<string, JsInstanceType>;
 	get started(): boolean;
+	get running(): boolean;
 	get exited(): boolean;
 	get exitStatus(): boolean | null;
 	get state(): string | null;
@@ -126,6 +127,10 @@ export class Interpreter implements InterpretationInfo, Readable<InterpretationI
 
 	get started(): boolean {
 		return this.#currentInstruction > -1;
+	}
+
+	get running(): boolean {
+		return this.started && !this.exited;
 	}
 
 	get exited(): boolean {

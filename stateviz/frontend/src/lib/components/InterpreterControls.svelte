@@ -21,7 +21,7 @@
 	on:stop={() => interpreter.reset()}
 	on:step={() => interpreter.step()}
 	on:skip={async () => {
-		while (!interpreter.exited) {
+		while (interpreter.started && !interpreter.exited) {
 			interpreter.step();
 			await delay(100);
 		}
