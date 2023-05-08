@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { circOut } from 'svelte/easing';
+	import { fly } from 'svelte/transition';
 	import type * as monaco from 'monaco-editor';
 	import StateGraph from './lib/components/StateGraph.svelte';
 	import StateLangEditor from './lib/components/StateLangEditor.svelte';
@@ -66,9 +68,16 @@
 
 <main>
 	<StateLangEditor {markers} {symbols} style="flex: 1; width: 50%" bind:value={program} />
-	{#if stateMachine}
-		<StateGraph {stateMachine} isUpToDate={compiling || isCompiledSuccessfully} style="flex: 1" />
-	{/if}
+	<div style:flex="1" style:position="relative">
+		{#if stateMachine}
+			<StateGraph {stateMachine} style="height: 100%" />
+		{/if}
+		{#if !compiling && !isCompiledSuccessfully}
+			<div id="not-up-to-date-message" in:fly={{ duration: 100, easing: circOut, y: -10 }}>
+				State graph is not up-to-date
+			</div>
+		{/if}
+	</div>
 </main>
 
 <style>
@@ -76,5 +85,15 @@
 		display: flex;
 		flex-direction: row;
 		height: 100vh;
+	}
+
+	#not-up-to-date-message {
+		position: absolute;
+		top: 1em;
+		left: 1em;
+		color: white;
+		background: #ff5555;
+		padding: 3px 6px 3px 6px;
+		border-radius: 3px;
 	}
 </style>
