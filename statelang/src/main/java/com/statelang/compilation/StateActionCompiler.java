@@ -95,6 +95,8 @@ final class StateActionCompiler {
             )
             .instruction(new JumpToInstruction(newState))
             .instruction(ExitInstruction.SUCCESS);
+
+        context.transitioned(true);
     }
 
     private static void compileAssignment(
@@ -174,6 +176,8 @@ final class StateActionCompiler {
             );
         }
 
+        var hasTransitioned = context.transitioned();
+
         var uniqueLabelKey = conditionLocation.line() + "_" + conditionLocation.column();
         var endLabel = "$if_end" + uniqueLabelKey;
         var falseBranchLabel = "$if_false" + uniqueLabelKey;
@@ -192,6 +196,10 @@ final class StateActionCompiler {
         }
 
         programBuilder.instruction(new LabelInstruction(endLabel));
+
+        if (!hasTransitioned) {
+            context.transitioned(false);
+        }
     }
 
     private static void compileAssertion(

@@ -23,4 +23,9 @@ final class CompilationContext {
     @Setter
     @Builder.Default
     private String currentState = null;
+
+    @Getter
+    @Setter
+    @Builder.Default
+    private boolean transitioned = false;
 }

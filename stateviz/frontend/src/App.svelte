@@ -15,13 +15,13 @@
 		let count := 0;
 
 		when COUNTING {
+			assert count < stop;
+
 			count := count + 1;
 
 			if count = stop {
 				state := STOPPED;
 			}
-
-			assert count < stop;
 		}
 		`);
 

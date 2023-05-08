@@ -100,7 +100,9 @@ final class DefinitionCompiler {
         var stateMachineBuilder = context.stateMachineBuilder();
         var state = inStateDefinition.state();
 
-        if (!stateMachineBuilder.definedStates().contains(state)) {
+        var isStateDefined = stateMachineBuilder.definedStates().contains(state);
+
+        if (!isStateDefined) {
             context.reporter().report(
                 Report.builder()
                     .kind(Report.Kind.UNDEFINED_STATE)
@@ -130,6 +132,12 @@ final class DefinitionCompiler {
         context.currentState(null);
 
         programBuilder.instruction(new JumpToInstruction(state));
+
+        if (isStateDefined && !context.transitioned()) {
+            stateMachineBuilder.transition(state, state);
+        }
+
+        context.transitioned(false);
     }
 
     private static void compileVariableDefinition(CompilationContext context, VariableDefinition definition) {
