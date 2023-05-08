@@ -1,6 +1,6 @@
+import * as monaco from 'monaco-editor';
 import { joinWithLast } from '../utils';
 import type { Report } from './compile';
-import * as monaco from 'monaco-editor';
 
 const REPORT_MESSAGE_MAP: Record<Report['kind'], (report: Report) => string> = {
 	INVALID_TOKEN: report => 'invalid token',
