@@ -2,6 +2,7 @@
 	import { circOut } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
 	import * as monaco from 'monaco-editor';
+	import { debounce, dedent } from './lib/utils';
 	import InterpreterControls from './lib/components/InterpreterControls.svelte';
 	import MemoryDisplay from './lib/components/MemoryDisplay.svelte';
 	import StateGraph from './lib/components/StateGraph.svelte';
@@ -14,7 +15,6 @@
 		Interpreter,
 		type InterpretationInfo,
 	} from './lib/statelang';
-	import { debounce, dedent } from './lib/utils';
 
 	let program = dedent(`
 		state {

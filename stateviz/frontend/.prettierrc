@@ -14,5 +14,13 @@
 	"printWidth": 100,
 
 	"importOrderSeparation": false,
-	"importOrder": ["^svelte(/|$)", "^axios$", "^\\w.*", "\\./", ".+\\.(css|sass|scss)$"]
+	"importOrder": [
+		"^svelte(/|$)",
+		"^axios$",
+		"^\\w.*",
+		"\\./lib/utils",
+		"\\./lib/components",
+		"\\./",
+		".+\\.(css|sass|scss)$"
+	]
 }
