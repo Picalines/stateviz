@@ -1,13 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { circOut } from 'svelte/easing';
+	import { fly } from 'svelte/transition';
 	import * as vis from 'vis-network/standalone';
 	import type { StateMachine } from '../statelang';
-
-	export let stateMachine: StateMachine;
 
 	let className = '';
 	export { className as class };
 	export let style = '';
+
+	export let stateMachine: StateMachine;
+
+	export let isUpToDate = true;
 
 	let container: HTMLDivElement | null = null;
 	let network: vis.Network | null = null;
@@ -28,20 +32,20 @@
 	}>();
 
 	onMount(() => {
-        network = new vis.Network(
-            container!,
-            { nodes, edges },
-            {
-                nodes: {
-                    shape: 'box',
-                    borderWidth: 2,
-                    color: {
-                        background: 'white',
-                        border: 'grey',
-                    },
-                },
-            },
-        );
+		network = new vis.Network(
+			container!,
+			{ nodes, edges },
+			{
+				nodes: {
+					shape: 'box',
+					borderWidth: 2,
+					color: {
+						background: 'white',
+						border: 'grey',
+					},
+				},
+			},
+		);
 	});
 
 	$: if (network) {
@@ -68,4 +72,32 @@
 	}
 </script>
 
-<div class={className} {style} bind:this={container} />
+<div id="graph-container" class={className} {style}>
+	<div id="vis-container" bind:this={container} />
+	{#if !isUpToDate}
+		<div id="up-to-date-status" in:fly={{ duration: 100, easing: circOut, y: -10 }}>
+			State graph is not up-to-date
+		</div>
+	{/if}
+</div>
+
+<style>
+	#graph-container {
+		position: relative;
+	}
+
+	#vis-container {
+		width: 100%;
+		height: 100%;
+	}
+
+	#up-to-date-status {
+		position: absolute;
+		top: 1em;
+		left: 1em;
+		color: white;
+		background: #ff5555;
+		padding: 3px 6px 3px 6px;
+		border-radius: 3px;
+	}
+</style>
