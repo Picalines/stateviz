@@ -52,6 +52,7 @@ public class ObjectMapperConfiguration {
         @JsonSubTypes.Type(value = PushInstruction.class, name = "push"),
         @JsonSubTypes.Type(value = StoreInstruction.class, name = "store"),
         @JsonSubTypes.Type(value = LoadInstruction.class, name = "load"),
+        @JsonSubTypes.Type(value = StateInstruction.class, name = "state"),
         @JsonSubTypes.Type(value = SourceLocationInstruction.class, name = "src"),
     })
     private interface InstructionMixin {

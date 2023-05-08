@@ -81,6 +81,7 @@ export type Instruction = TypedObject<{
 	store: { memoryKey: string };
 	load: { memoryKey: string };
 	src: { location: SourceLocation };
+	state: { state: string };
 }>;
 
 export type Symbol = { id: string } & TypedObject<{
@@ -92,7 +93,7 @@ export type Symbol = { id: string } & TypedObject<{
 export type CompiledProgram = {
 	stateMachine: StateMachine;
 	instructions: Instruction[];
-    jumpTable: Record<string, number>;
+	jumpTable: Record<string, number>;
 	symbols: Record<string, Symbol>;
 };
 

@@ -13,7 +13,11 @@
 
 	export let value = '';
 
+	export let readOnly = false;
+
 	export let markers: monaco.editor.IMarkerData[] = [];
+
+	export let decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
 	export let symbols: StateLangSymbol[] = [];
 
@@ -32,4 +36,4 @@
 	}
 </script>
 
-<MonacoEditor class={className} {options} {markers} {style} bind:value />
+<MonacoEditor class={className} {options} {readOnly} {markers} {decorations} {style} bind:value />

@@ -1,3 +1,4 @@
+import { readable, writable, type Readable } from 'svelte/store';
 import type {
 	CompiledProgram,
 	Instruction,
@@ -21,17 +22,26 @@ type AllPairs<Elements extends string> = {
 	[T in Elements]: { [U in Elements]: [T, U] }[Elements];
 }[Elements];
 
-export class Interpreter {
+export type InterpretationInfo = {
+	get memory(): ReadonlyMap<string, JsInstanceType>;
+	get started(): boolean;
+	get exited(): boolean;
+	get exitStatus(): boolean | null;
+	get state(): string | null;
+	get location(): SourceLocation;
+};
+
+export class Interpreter implements InterpretationInfo, Readable<InterpretationInfo> {
+	readonly #subscribe: Readable<InterpretationInfo>['subscribe'];
+	readonly #updateSubscribers: () => void;
+
 	readonly #instructions: Instruction[];
 
-	#currentInstruction = 0;
-
+	#currentInstruction = -1;
 	readonly #stack: JsInstanceType[] = [];
-
-	readonly #memory: Map<string, JsInstanceType> = new Map();
-
+	#memory: Map<string, JsInstanceType> = new Map();
+	#state: string | null = null;
 	#location: SourceLocation = { line: 1, column: 1 };
-
 	#exitStatus: boolean | null = null;
 
 	readonly #instructionMap: {
@@ -39,6 +49,10 @@ export class Interpreter {
 	};
 
 	constructor(compiledProgram: CompiledProgram) {
+		const { subscribe, set } = writable(this);
+		this.#subscribe = subscribe;
+		this.#updateSubscribers = () => set(this);
+
 		this.#instructions = compiledProgram.instructions;
 
 		const unaryOperatorMap: {
@@ -81,13 +95,15 @@ export class Interpreter {
 			store: ({ memoryKey }) => this.#memory.set(memoryKey, this.#stack.pop()!),
 			label: () => {},
 			jump: ({ destination }) => {
-				this.#currentInstruction = compiledProgram.jumpTable[destination] ?? this.#currentInstruction;
+				this.#currentInstruction =
+					compiledProgram.jumpTable[destination] ?? this.#currentInstruction;
 			},
 			jump_ifn: ({ destination }) => {
 				if (this.#stack.pop() === false) {
 					this.#instructionMap['jump']({ type: 'jump', destination });
 				}
 			},
+			state: ({ state }) => (this.#state = state),
 			src: ({ location }) => (this.#location = location),
 			exit: ({ success }) => (this.#exitStatus = success),
 			un_op: ({ operator }) => {
@@ -108,6 +124,10 @@ export class Interpreter {
 		return this.#memory;
 	}
 
+	get started(): boolean {
+		return this.#currentInstruction > -1;
+	}
+
 	get exited(): boolean {
 		return this.#exitStatus !== null;
 	}
@@ -116,19 +136,38 @@ export class Interpreter {
 		return this.#exitStatus;
 	}
 
+	get state(): string | null {
+		return this.#state;
+	}
+
 	get location(): SourceLocation {
 		return this.#location;
 	}
 
-	interpret(): SourceLocation {
+	get subscribe(): Readable<InterpretationInfo>['subscribe'] {
+		return this.#subscribe;
+	}
+
+	step(): SourceLocation {
 		const lastLocation = this.#location;
 
 		while (!this.exited && locationEquals(lastLocation, this.#location)) {
-			const instruction = this.#instructions[this.#currentInstruction++];
+			const instruction = this.#instructions[++this.#currentInstruction];
 			(this.#instructionMap as any)[instruction.type](instruction);
 		}
 
+		this.#updateSubscribers();
 		return this.#location;
+	}
+
+	reset() {
+		this.#exitStatus = null;
+		this.#currentInstruction = -1;
+		this.#state = null;
+		this.#location = { line: 1, column: 1 };
+		this.#memory = new Map();
+
+		this.#updateSubscribers();
 	}
 }
 
