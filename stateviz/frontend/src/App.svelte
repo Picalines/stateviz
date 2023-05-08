@@ -3,6 +3,7 @@
 	import { fly } from 'svelte/transition';
 	import * as monaco from 'monaco-editor';
 	import InterpreterControls from './lib/components/InterpreterControls.svelte';
+	import MemoryDisplay from './lib/components/MemoryDisplay.svelte';
 	import StateGraph from './lib/components/StateGraph.svelte';
 	import StateLangEditor from './lib/components/StateLangEditor.svelte';
 	import {
@@ -97,7 +98,7 @@
 	<StateLangEditor
 		{markers}
 		{symbols}
-		readOnly={interpreterInfo?.started ?? false}
+		readOnly={interpreterInfo?.running ?? false}
 		style="flex: 1; width: 50%"
 		bind:value={program}
 		decorations={createCurrentLineDecoration(interpreterInfo)}
@@ -120,6 +121,12 @@
 		<InterpreterControls
 			{interpreter}
 			style="position: absolute; left: 25%; bottom: 1rem; transform: translateX(-50%)"
+		/>
+	{/if}
+	{#if interpreter?.started && interpreterInfo}
+		<MemoryDisplay
+			memory={interpreterInfo.memory}
+			style="position: absolute; bottom: 1rem; left: calc(50% + 1rem)"
 		/>
 	{/if}
 </main>
