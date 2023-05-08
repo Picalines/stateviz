@@ -11,6 +11,11 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 java.sourceCompatibility = JavaVersion.VERSION_17
 
+bootJar {
+    archiveFileName = 'stateviz.jar'
+    launchScript()
+}
+
 repositories {
     mavenCentral()
 }
@@ -48,10 +53,28 @@ task buildFrontend(type: Exec) {
     commandLine npmCmd, 'run', 'build'
 }
 
+task copyJarToElectron(type: Copy) {
+    from './build/libs'
+    into './src/main/electron'
+    include '*.jar'
+}
+
+task buildElectron(type: Copy) {
+    dependsOn ordered('buildFrontend', 'bootJar', 'copyJarToElectron')
+}
+
 bootRun {
   args = ["--spring.profiles.active=dev"]
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+def ordered(String... dependencyPaths) {
+    def dependencies = dependencyPaths.collect { tasks.getByPath(it) }
+    for (int i = 0; i < dependencies.size() - 1; i++) {
+        dependencies[i + 1].mustRunAfter(dependencies[i])
+    }
+    return dependencies
 }
