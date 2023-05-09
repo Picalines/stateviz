@@ -41,6 +41,10 @@
 		monaco.editor.setModelMarkers(model, 'monaco-editor', markers);
 		editor.updateOptions({ readOnly });
 
+		if (model.getValue() !== value) {
+			model.setValue(value);
+		}
+
 		decorationsCollection?.clear();
 		decorationsCollection = editor.createDecorationsCollection(decorations);
 	}
