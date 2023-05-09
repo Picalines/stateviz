@@ -92,6 +92,25 @@
 
 		return info.started && !info.exited ? [{ range, options: currentLineDecorationOptions }] : [];
 	}
+
+	interface ElectronAPI {
+		subscribe(event: string, handler: (...args: any[]) => void): void;
+		send(event: string, ...args: any[]): void;
+	}
+
+	const electronAPI: ElectronAPI = (window as any).electronAPI;
+
+	electronAPI.subscribe('newFile', () => {
+		program = '';
+	});
+
+	electronAPI.subscribe('fileOpen', newProgram => {
+		program = newProgram;
+	});
+
+	electronAPI.subscribe('saveFileRequest', () => {
+		electronAPI.send('saveFile', program);
+	});
 </script>
 
 <main style:position="relative">
