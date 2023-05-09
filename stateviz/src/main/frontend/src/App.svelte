@@ -130,9 +130,13 @@
 				style="height: 100%"
 			/>
 		{/if}
-		{#if !compiling && !isCompiledSuccessfully}
+		{#if !compiling && !isCompiledSuccessfully || interpreterInfo?.exitStatus === false}
 			<div id="not-up-to-date-message" in:fly={{ duration: 100, easing: circOut, y: -10 }}>
-				State graph is not up-to-date
+				{#if interpreterInfo?.exitStatus === false}
+					Assertion error on line {interpreterInfo.location.line}, column {interpreterInfo.location.column}
+				{:else}
+					State graph is not up-to-date
+				{/if}
 			</div>
 		{/if}
 	</div>
