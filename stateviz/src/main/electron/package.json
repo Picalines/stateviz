@@ -1,18 +1,43 @@
 {
 	"name": "electron",
 	"private": true,
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"main": "main.js",
+	"author": "Picalines",
 	"scripts": {
 		"start": "electron .",
-		"format": "prettier . --write --ignore-unknown"
+		"format": "prettier . --write --ignore-unknown",
+		"build": "electron-builder build"
 	},
 	"devDependencies": {
-		"prettier": "^2.8.8"
+		"electron-builder": "^24.4.0",
+		"prettier": "^2.8.8",
+		"electron": "^24.2.0"
 	},
 	"dependencies": {
-		"electron": "^24.2.0",
-		"kill-port": "^2.0.1",
 		"tree-kill": "^1.2.2"
+	},
+	"build": {
+		"appId": "com.stateviz",
+		"productName": "Stateviz",
+		"files": [
+			"./*.js",
+			"./*.jar"
+		],
+		"win": {
+			"target": [
+				"nsis"
+			],
+			"icon": "./assets/icons/app.png",
+			"asar": false
+		},
+		"nsis": {
+			"oneClick": false,
+			"allowToChangeInstallationDirectory": true,
+			"runAfterFinish": true,
+			"uninstallDisplayName": "Uninstall Stateviz",
+			"installerIcon": "./assets/icons/app.ico",
+			"uninstallerIcon": "./assets/icons/app.ico"
+		}
 	}
 }

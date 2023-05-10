@@ -44,12 +44,17 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.23.1'
 }
 
+def npmCmd = Os.isFamily(Os.FAMILY_WINDOWS)
+    ? 'npm.cmd'
+    : 'npm'
+
 task buildFrontend(type: Exec) {
-    String npmCmd = 'npm'
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        npmCmd = 'npm.cmd'
-    }
     workingDir './src/main/frontend'
+    commandLine npmCmd, 'run', 'build'
+}
+
+task buildElectronInstaller(type: Exec) {
+    workingDir './src/main/electron'
     commandLine npmCmd, 'run', 'build'
 }
 
@@ -60,7 +65,7 @@ task copyJarToElectron(type: Copy) {
 }
 
 task buildElectron(type: Copy) {
-    dependsOn ordered('buildFrontend', 'bootJar', 'copyJarToElectron')
+    dependsOn ordered('buildFrontend', 'bootJar', 'copyJarToElectron', 'buildElectronInstaller')
 }
 
 bootRun {
