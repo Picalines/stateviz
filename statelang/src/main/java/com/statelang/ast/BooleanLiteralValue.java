@@ -2,9 +2,6 @@ package com.statelang.ast;
 
 import com.statelang.tokenization.Token;
 
-import lombok.experimental.Accessors;
-
-@Accessors(fluent = true)
 public final class BooleanLiteralValue extends LiteralValueNode {
 
     private final boolean value;

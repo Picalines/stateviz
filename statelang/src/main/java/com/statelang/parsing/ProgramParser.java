@@ -12,10 +12,8 @@ import com.statelang.parsing.lib.Parser;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-@Accessors(fluent = true)
 public final class ProgramParser {
 
     private static Parser<Definition> definition = Parse.oneOf(

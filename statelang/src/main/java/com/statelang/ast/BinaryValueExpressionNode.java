@@ -5,10 +5,8 @@ import com.statelang.tokenization.SourceSelection;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.experimental.Accessors;
 
 @AllArgsConstructor
-@Accessors(fluent = true)
 public final class BinaryValueExpressionNode extends ValueExpressionNode {
 
     @Getter

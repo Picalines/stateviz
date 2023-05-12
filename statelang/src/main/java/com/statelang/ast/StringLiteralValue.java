@@ -3,9 +3,7 @@ package com.statelang.ast;
 import com.statelang.tokenization.Token;
 
 import lombok.Getter;
-import lombok.experimental.Accessors;
 
-@Accessors(fluent = true)
 public final class StringLiteralValue extends LiteralValueNode {
 
     @Getter

@@ -5,10 +5,8 @@ import com.statelang.tokenization.Token;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.experimental.Accessors;
 
 @AllArgsConstructor
-@Accessors(fluent = true)
 public abstract class LiteralValueNode extends ValueExpressionNode {
 
     @Getter

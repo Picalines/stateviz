@@ -4,10 +4,8 @@ import javax.annotation.Nullable;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.experimental.Accessors;
 
 @AllArgsConstructor
-@Accessors(fluent = true)
 public final class ConditionalAction extends StateAction {
 
     @Getter

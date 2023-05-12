@@ -1,9 +1,7 @@
 package com.statelang.tokenization;
 
 import lombok.Getter;
-import lombok.experimental.Accessors;
 
-@Accessors(fluent = true)
 public final class TokenBookmark implements AutoCloseable {
     @Getter
     private final TokenReader reader;

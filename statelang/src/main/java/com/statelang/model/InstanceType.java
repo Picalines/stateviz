@@ -13,13 +13,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Accessors;
 
 @RequiredArgsConstructor
 public abstract class InstanceType<T> {
 
     @AllArgsConstructor
-    @Accessors(fluent = true)
     @Getter
     @Builder(access = AccessLevel.PRIVATE)
     public static final class InstanceBinaryOperator<TLeft, TRight, TReturn> {
@@ -32,7 +30,6 @@ public abstract class InstanceType<T> {
     }
 
     @AllArgsConstructor
-    @Accessors(fluent = true)
     @Getter
     @Builder(access = AccessLevel.PRIVATE)
     public static final class InstanceUnaryOperator<TRight, TReturn> {

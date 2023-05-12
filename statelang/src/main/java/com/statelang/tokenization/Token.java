@@ -4,10 +4,8 @@ import java.util.regex.Pattern;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Accessors;
 
 @RequiredArgsConstructor
-@Accessors(fluent = true)
 public final class Token {
 
 	public static enum Kind {

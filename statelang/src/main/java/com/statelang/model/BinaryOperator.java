@@ -2,10 +2,8 @@ package com.statelang.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.experimental.Accessors;
 
 @AllArgsConstructor
-@Accessors(fluent = true)
 public enum BinaryOperator {
     PLUS("+", "%s + %s"),
     MINUS("-", "%s - %s"),
