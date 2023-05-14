@@ -14,7 +14,7 @@ app.on('ready', async () => {
 		backgroundColor: 'lightgray',
 		title: 'stateviz',
 		show: false,
-		icon: path.join(__dirname, 'assets/icons/app.png'),
+		icon: path.join(__dirname, 'assets/icons/app.ico'),
 		webPreferences: {
 			defaultEncoding: 'UTF-8',
 			preload: path.join(__dirname, 'preload.js'),

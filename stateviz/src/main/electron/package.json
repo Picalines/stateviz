@@ -28,7 +28,7 @@
 			"target": [
 				"nsis"
 			],
-			"icon": "./assets/icons/app.png",
+			"icon": "./assets/icons/app.ico",
 			"asar": false
 		},
 		"nsis": {
