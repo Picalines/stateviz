@@ -4,6 +4,7 @@ import static com.statelang.parsing.lib.ParsingTestUtils.assertParsesWithoutErro
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +45,14 @@ class ProgramParserTests {
                 new Program(
                     Arrays.asList(
                         new StateDefinition(
-                            Arrays.asList("COUNTING", "STOPPED"),
+                            Arrays.asList(
+                                new StateDefinition.State(
+                                    new Token(null, IDENTIFIER, "COUNTING"), Collections.emptyList()
+                                ),
+                                new StateDefinition.State(
+                                    new Token(null, IDENTIFIER, "STOPPED"), Collections.emptyList()
+                                )
+                            ),
                             new Token(null, KEYWORD_STATE, "state")
                         ),
                         new ConstantDefinition(

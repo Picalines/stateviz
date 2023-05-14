@@ -51,7 +51,7 @@ class TokenReaderTests {
     @Test
     void ignoredTokens() {
         var reporter = new Reporter();
-        var reader = createReader("# comment\n token] ", reporter);
+        var reader = createReader("# comment\n token? ", reporter);
 
         assertFalse(reader.atEnd());
 

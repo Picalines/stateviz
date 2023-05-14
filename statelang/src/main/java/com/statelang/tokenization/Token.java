@@ -19,6 +19,8 @@ public final class Token {
 
 		OPEN_PARENTHESIS("'('", "\\("),
 		CLOSE_PARENTHESIS("')'", "\\)"),
+		OPEN_BRACKET("'['", "\\["),
+		CLOSE_BRACKET("']'", "\\]"),
 		OPEN_CURLY_BRACE("'{'", "\\{"),
 		CLOSE_CURLY_BRACE("'}'", "\\}"),
 

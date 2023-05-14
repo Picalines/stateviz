@@ -4,15 +4,27 @@ import java.util.List;
 
 import com.statelang.tokenization.Token;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Getter
 public final class StateDefinition extends Definition {
 
+    @RequiredArgsConstructor
     @Getter
-    private final List<String> states;
+    public static final class State {
 
-    @Getter
+        private final Token nameToken;
+
+        private final List<Attribute> attributes;
+
+        public String name() {
+            return nameToken.text();
+        }
+    }
+
+    private final List<State> states;
+
     private final Token stateToken;
 }

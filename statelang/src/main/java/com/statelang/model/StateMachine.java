@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.base.Preconditions;
@@ -16,22 +17,24 @@ import lombok.Singular;
 
 public final class StateMachine {
 
+    public record State(String name, Map<String, String> attributes) {}
+
     @Getter
-    private final Set<String> states;
+    private final Set<State> states;
 
     @Getter
     private final Map<String, Set<String>> transitions;
 
     @Getter
-    private String initialState;
+    private State initialState;
 
     @Builder
-    private StateMachine(@Singular Set<String> states, String initialState, Map<String, Set<String>> transitions) {
+    private StateMachine(@Singular Set<State> states, String initialStateName, Map<String, Set<String>> transitions) {
         Preconditions.checkArgument(!states.isEmpty());
 
-        this.initialState = initialState;
-
         this.states = Collections.unmodifiableSet(states);
+
+        this.initialState = getStateByName(initialStateName);
 
         var transitionsCopy = new HashMap<String, Set<String>>();
 
@@ -42,6 +45,13 @@ public final class StateMachine {
         this.transitions = Collections.unmodifiableMap(transitionsCopy);
     }
 
+    public State getStateByName(String name) {
+        return states.stream()
+            .filter(state -> state.name.equals(name))
+            .findFirst()
+            .orElseThrow();
+    }
+
     public static final class StateMachineBuilder {
 
         StateMachineBuilder() {
@@ -50,15 +60,17 @@ public final class StateMachine {
         }
 
         public StateMachineBuilder initialState(String initialState) {
-            this.initialState = initialState;
+            Preconditions
+                .checkState(states.stream().anyMatch(s -> s.name.equals(initialState)), "undefined initial state");
+            this.initialStateName = initialState;
             return this;
         }
 
         public StateMachineBuilder transition(String from, String to) {
             Preconditions.checkArgument(from != null, "from is null");
             Preconditions.checkArgument(to != null, "to is null");
-            Preconditions.checkState(states.contains(from), "undefined from state");
-            Preconditions.checkState(states.contains(to), "undefined to state");
+            Preconditions.checkState(states.stream().anyMatch(s -> s.name.equals(from)), "undefined from state");
+            Preconditions.checkState(states.stream().anyMatch(s -> s.name.equals(to)), "undefined to state");
 
             transitions
                 .computeIfAbsent(from, key -> new HashSet<>())
@@ -67,11 +79,13 @@ public final class StateMachine {
             return this;
         }
 
-        public String definedInitialState() {
-            return initialState;
+        public Optional<State> definedInitialState() {
+            return states.stream()
+                .filter(state -> state.name.equals(initialStateName))
+                .findFirst();
         }
 
-        public List<String> definedStates() {
+        public List<State> definedStates() {
             return Collections.unmodifiableList(states);
         }
 

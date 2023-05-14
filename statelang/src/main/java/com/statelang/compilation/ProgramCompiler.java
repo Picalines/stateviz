@@ -45,11 +45,11 @@ public final class ProgramCompiler {
 
         nonInStateDefinitions.forEach(def -> DefinitionCompiler.compile(compilationContext, def));
 
-        var initialState = stateMachineBuilder.definedInitialState();
+        var initialState = stateMachineBuilder.definedInitialState().orElse(null);
         if (initialState != null) {
             programBuilder
-                .instruction(new StateInstruction(initialState))
-                .instruction(new JumpToInstruction(initialState))
+                .instruction(new StateInstruction(initialState.name()))
+                .instruction(new JumpToInstruction(initialState.name()))
                 .instruction(ExitInstruction.SUCCESS);
         }
 
@@ -85,17 +85,16 @@ public final class ProgramCompiler {
         List<Definition> definitions,
         StateMachine stateMachine)
     {
-        var reachableStates = stateMachine
-            .transitions()
+        var reachableStates = stateMachine.transitions()
             .values()
             .stream()
             .flatMap(Collection::stream)
+            .map(stateMachine::getStateByName)
             .collect(Collectors.toSet());
 
         reachableStates.add(stateMachine.initialState());
 
-        var unreachableStates = stateMachine
-            .states()
+        var unreachableStates = stateMachine.states()
             .stream()
             .filter(Predicate.not(reachableStates::contains));
 
@@ -113,7 +112,7 @@ public final class ProgramCompiler {
                 Report.builder()
                     .kind(Report.Kind.UNREACHABLE_STATE)
                     .selection(stateDefinition.get().stateToken().selection())
-                    .info(unreachableState)
+                    .info(unreachableState.name())
             );
         });
     }

@@ -1,5 +1,7 @@
 package com.statelang.compilation;
 
+import java.util.stream.Collectors;
+
 import com.statelang.ast.*;
 import com.statelang.compilation.instruction.*;
 import com.statelang.compilation.symbol.ConstantSymbol;
@@ -73,7 +75,10 @@ final class StateActionCompiler {
         var newState = transitionAction.newState();
         var stateMachineBuilder = context.stateMachineBuilder();
 
-        var definedStates = stateMachineBuilder.definedStates();
+        var definedStates = stateMachineBuilder.definedStates()
+            .stream()
+            .map(StateMachine.State::name)
+            .collect(Collectors.toSet());
 
         if (definedStates.contains(newState)) {
             var currentState = context.currentState();

@@ -98,17 +98,17 @@
 		send(event: string, ...args: any[]): void;
 	}
 
-	const electronAPI: ElectronAPI = (window as any).electronAPI;
+	const electronAPI: ElectronAPI | undefined = (window as any).electronAPI;
 
-	electronAPI.subscribe('newFile', () => {
+	electronAPI?.subscribe('newFile', () => {
 		program = '';
 	});
 
-	electronAPI.subscribe('fileOpen', newProgram => {
+	electronAPI?.subscribe('fileOpen', newProgram => {
 		program = newProgram;
 	});
 
-	electronAPI.subscribe('saveFileRequest', () => {
+	electronAPI?.subscribe('saveFileRequest', () => {
 		electronAPI.send('saveFile', program);
 	});
 </script>

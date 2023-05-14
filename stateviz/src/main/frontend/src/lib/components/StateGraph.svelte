@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import * as vis from 'vis-network/standalone';
-	import type { StateMachine } from '../statelang';
+	import type { StateMachine, StateMachineState } from '../statelang';
 
 	let className = '';
 	export { className as class };
@@ -14,24 +14,17 @@
 	let container: HTMLDivElement | null = null;
 	let network: vis.Network | null = null;
 
-	const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+	const nodes = new vis.DataSet<
+		vis.NodeOptions & {
+			id: string;
+		}
+	>();
 
-	const nodeFont = { multi: 'html' };
-
-	const nodes = new vis.DataSet<{
-		id: string;
-		label: string;
-		margin: { top: number; right: number; bottom: number; left: number };
-		borderWidth: number;
-		font: typeof nodeFont;
-	}>();
-
-	const edges = new vis.DataSet<{
-		id: undefined;
-		from: string;
-		to: string;
-		arrows: string;
-	}>();
+	const edges = new vis.DataSet<
+		vis.EdgeOptions & {
+			id: undefined;
+		}
+	>();
 
 	onMount(() => {
 		network = new vis.Network(
@@ -44,32 +37,44 @@
 						background: 'white',
 						border: 'grey',
 					},
+					font: {
+						multi: 'html',
+					},
+					margin: { top: 10, right: 10, bottom: 10, left: 10 },
 				},
 			},
 		);
 	});
 
 	$: if (network) {
-		const states = new Set(stateMachine.states);
+		const states: Map<string, StateMachineState> = stateMachine.states.reduce((map, state) => {
+			map.set(state.name, state);
+			return map;
+		}, new Map());
 
-		for (const state of states) {
-			const isCurrentState = state === currentState;
+		for (const state of states.values()) {
+			const isCurrentState = state.name === currentState;
+
+			const stateDisplayName = String(
+				'label' in state.attributes ? state.attributes.label : state.name,
+			);
 
 			nodes.update(
 				{
-					id: state,
-					label: isCurrentState ? `<b>${state}</b>` : state,
-					margin,
-					font: nodeFont,
+					id: state.name,
+					label: isCurrentState ? `<b>${stateDisplayName}</b>` : stateDisplayName,
 					borderWidth: isCurrentState ? 4 : 2,
+					font: {
+						size: Number(state.attributes.fontSize ?? 20)
+					}
 				},
-				state,
+				state.name,
 			);
 		}
 
-		for (const id of nodes.getIds()) {
-			if (!states.has(id as string)) {
-				nodes.remove(id);
+		for (const stateName of nodes.getIds()) {
+			if (!states.has(stateName as string)) {
+				nodes.remove(stateName);
 			}
 		}
 

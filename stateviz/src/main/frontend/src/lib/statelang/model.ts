@@ -41,9 +41,14 @@ export type Report = {
 	expectedTokenKinds: string[];
 };
 
+export type StateMachineState = {
+	name: string;
+	attributes: Record<string, string>;
+};
+
 export type StateMachine = {
-	initialState: string;
-	states: string[];
+	initialState: StateMachineState;
+	states: StateMachineState[];
 	transitions: Record<string, string[]>;
 };
 

@@ -1,6 +1,8 @@
 package com.statelang.parsing;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Nested;
@@ -137,13 +139,24 @@ class DefinitionParserTests {
                 );
         }
 
+        private static List<StateDefinition.State> listOfStates(String... states) {
+            return Arrays.stream(states)
+                .map(
+                    name -> new StateDefinition.State(
+                        new Token(null, Token.Kind.IDENTIFIER, name), Collections.emptyList()
+                    )
+                )
+                .toList();
+        }
+
         @Test
         void singleState() {
             assertThat(assertParsesWithoutErrors("state { SINGLE }", DefinitionParser.state))
                 .usingRecursiveComparison()
-                .ignoringFieldsOfTypes(Token.class)
+                .ignoringFields("stateToken")
+                .ignoringFieldsOfTypes(SourceSelection.class, Token.Kind.class)
                 .isEqualTo(
-                    new StateDefinition(Arrays.asList("SINGLE"), null)
+                    new StateDefinition(listOfStates("SINGLE"), null)
                 );
         }
 
@@ -151,23 +164,26 @@ class DefinitionParserTests {
         void manyStates() {
             assertThat(assertParsesWithoutErrors("state { A, B }", DefinitionParser.state))
                 .usingRecursiveComparison()
-                .ignoringFieldsOfTypes(Token.class)
+                .ignoringFields("stateToken")
+                .ignoringFieldsOfTypes(SourceSelection.class, Token.Kind.class)
                 .isEqualTo(
-                    new StateDefinition(Arrays.asList("A", "B"), null)
+                    new StateDefinition(listOfStates("A", "B"), null)
                 );
 
             assertThat(assertParsesWithoutErrors("state { A, B, C }", DefinitionParser.state))
                 .usingRecursiveComparison()
-                .ignoringFieldsOfTypes(Token.class)
+                .ignoringFields("stateToken")
+                .ignoringFieldsOfTypes(SourceSelection.class, Token.Kind.class)
                 .isEqualTo(
-                    new StateDefinition(Arrays.asList("A", "B", "C"), null)
+                    new StateDefinition(listOfStates("A", "B", "C"), null)
                 );
 
             assertThat(assertParsesWithoutErrors("state { A, B, C, }", DefinitionParser.state))
                 .usingRecursiveComparison()
-                .ignoringFieldsOfTypes(Token.class)
+                .ignoringFields("stateToken")
+                .ignoringFieldsOfTypes(SourceSelection.class, Token.Kind.class)
                 .isEqualTo(
-                    new StateDefinition(Arrays.asList("A", "B", "C"), null)
+                    new StateDefinition(listOfStates("A", "B", "C"), null)
                 );
         }
     }

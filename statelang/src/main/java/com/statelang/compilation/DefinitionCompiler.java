@@ -1,7 +1,12 @@
 package com.statelang.compilation;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import com.statelang.ast.Attribute;
 import com.statelang.ast.ConstantDefinition;
 import com.statelang.ast.Definition;
 import com.statelang.ast.InStateDefinition;
@@ -15,6 +20,7 @@ import com.statelang.compilation.symbol.ConstantSymbol;
 import com.statelang.compilation.symbol.StateSymbol;
 import com.statelang.compilation.symbol.VariableSymbol;
 import com.statelang.diagnostics.Report;
+import com.statelang.model.StateMachine;
 import com.statelang.tokenization.SourceSelection;
 
 import lombok.AccessLevel;
@@ -47,27 +53,34 @@ final class DefinitionCompiler {
         throw new UnsupportedOperationException(definition.getClass().getName() + " definition is not implemented");
     }
 
+    private static <T> Predicate<T> distinctByFilter(Function<T, ?> mapper) {
+        var seen = new HashSet<>();
+        return value -> seen.add(mapper.apply(value));
+    }
+
     private static void compileStateDefinition(CompilationContext context, StateDefinition stateDefinition) {
         var stateMachineBuilder = context.stateMachineBuilder();
         var programBuilder = context.programBuilder();
         var states = stateDefinition.states();
 
+        var stateNames = states.stream().map(StateDefinition.State::name).toList();
+
         states
             .stream()
-            .filter(state -> Collections.frequency(stateDefinition.states(), state) > 1)
-            .distinct()
+            .filter(state -> Collections.frequency(stateNames, state.name()) > 1)
+            .filter(distinctByFilter(StateDefinition.State::name))
             .forEach(state -> {
                 context.reporter().report(
                     Report.builder()
                         .kind(Report.Kind.DUPLICATE_IDENTIFIER)
-                        .selection(stateDefinition.stateToken().selection())
-                        .info(state)
+                        .selection(state.nameToken().selection())
+                        .info(state.name())
                 );
             });
 
         states = states
             .stream()
-            .distinct()
+            .filter(distinctByFilter(StateDefinition.State::name))
             .toList();
 
         if (!stateMachineBuilder.definedStates().isEmpty()) {
@@ -87,12 +100,20 @@ final class DefinitionCompiler {
         }
 
         states.forEach(state -> {
-            stateMachineBuilder.state(state);
-            programBuilder.symbol(new StateSymbol(state));
+            stateMachineBuilder.state(
+                new StateMachine.State(
+                    state.name(),
+                    state.attributes()
+                        .stream()
+                        .collect(Collectors.toMap(Attribute::name, Attribute::value))
+                )
+            );
+
+            programBuilder.symbol(new StateSymbol(state.name()));
         });
 
         if (!states.isEmpty()) {
-            stateMachineBuilder.initialState(states.get(0));
+            stateMachineBuilder.initialState(states.get(0).name());
         }
     }
 
@@ -100,7 +121,9 @@ final class DefinitionCompiler {
         var stateMachineBuilder = context.stateMachineBuilder();
         var state = inStateDefinition.state();
 
-        var isStateDefined = stateMachineBuilder.definedStates().contains(state);
+        var isStateDefined = stateMachineBuilder.definedStates()
+            .stream()
+            .anyMatch(definedState -> definedState.name().equals(state));
 
         if (!isStateDefined) {
             context.reporter().report(
