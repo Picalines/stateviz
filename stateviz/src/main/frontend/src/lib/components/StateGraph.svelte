@@ -87,4 +87,43 @@
 	}
 </script>
 
-<div class={className} {style} bind:this={container} />
+<div class={className} {style}>
+	<div id="vis-network" bind:this={container} />
+	<i
+		id="reset-btn"
+		class="bi bi-fullscreen-exit"
+		on:click={() => network.fit()}
+		on:keypress={() => network.fit()}
+	/>
+</div>
+
+<style>
+	#vis-network {
+		height: 100%;
+	}
+
+	#reset-btn {
+		position: absolute;
+		bottom: 20px;
+		right: 20px;
+		z-index: 10;
+		color: white;
+		background: #2d2d2d;
+		--size: 50px;
+		width: var(--size);
+		height: var(--size);
+		text-align: center;
+		vertical-align: middle;
+		line-height: var(--size);
+		border-radius: 100%;
+		transition: scale linear 0.05s;
+	}
+
+	#reset-btn:hover {
+		cursor: pointer;
+	}
+
+	#reset-btn:active {
+		scale: 90%;
+	}
+</style>
