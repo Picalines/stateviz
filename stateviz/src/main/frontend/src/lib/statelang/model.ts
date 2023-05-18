@@ -119,3 +119,9 @@ export const stateLangSyntax = {
 	],
 	operators: [':=', '!=', '=', '+', '-', '*', '/', '%'],
 } as const;
+
+export function locationEquals(a: SourceLocation, b: SourceLocation) {
+	const { line: aLine, column: aColumn } = a;
+	const { line: bLine, column: bColumn } = b;
+	return aLine == bLine && aColumn == bColumn;
+}

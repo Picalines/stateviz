@@ -1,16 +1,18 @@
-import { readable, writable, type Readable } from 'svelte/store';
-import type {
-	CompiledProgram,
-	Instruction,
-	InstanceType,
-	SourceLocation,
-	UnaryOperator,
-	BinaryOperator,
+import { writable, type Readable } from 'svelte/store';
+import { Decimal } from 'decimal.js';
+import {
+	type CompiledProgram,
+	type Instruction,
+	type InstanceType,
+	type SourceLocation,
+	type UnaryOperator,
+	type BinaryOperator,
+	locationEquals,
 } from './model';
 
 type JsInstanceTypeMap = {
 	boolean: boolean;
-	number: number;
+	number: Decimal;
 	string: string;
 };
 
@@ -22,12 +24,15 @@ type AllPairs<Elements extends string> = {
 	[T in Elements]: { [U in Elements]: [T, U] }[Elements];
 }[Elements];
 
+export class RuntimeError extends Error {}
+
 export type InterpretationInfo = {
 	get memory(): ReadonlyMap<string, JsInstanceType>;
 	get started(): boolean;
 	get running(): boolean;
 	get exited(): boolean;
 	get exitStatus(): boolean | null;
+	get error(): RuntimeError | null;
 	get state(): string | null;
 	get location(): SourceLocation;
 };
@@ -44,6 +49,7 @@ export class Interpreter implements InterpretationInfo, Readable<InterpretationI
 	#state: string | null = null;
 	#location: SourceLocation = { line: 1, column: 1 };
 	#exitStatus: boolean | null = null;
+	#error: RuntimeError | null = null;
 
 	readonly #instructionMap: {
 		[T in Instruction['type']]: (instruction: Instruction & { type: T }) => void;
@@ -61,7 +67,7 @@ export class Interpreter implements InterpretationInfo, Readable<InterpretationI
 		} = {
 			NOT_boolean: bool => !bool,
 			PLUS_number: num => num,
-			MINUS_number: num => -num,
+			MINUS_number: num => num.negated(),
 		};
 
 		const binaryOperatorMap: {
@@ -74,24 +80,34 @@ export class Interpreter implements InterpretationInfo, Readable<InterpretationI
 			boolean_OR_boolean: (a, b) => a || b,
 			boolean_EQUALS_boolean: (a, b) => a === b,
 			boolean_NOT_EQUALS_boolean: (a, b) => a !== b,
-			number_PLUS_number: (a, b) => a + b,
-			number_MINUS_number: (a, b) => a - b,
-			number_MULTIPLY_number: (a, b) => a * b,
-			number_DIVIDE_number: (a, b) => a / b,
-			number_MODULO_number: (a, b) => a % b,
-			number_EQUALS_number: (a, b) => a === b,
-			number_NOT_EQUALS_number: (a, b) => a !== b,
-			number_GREATER_number: (a, b) => a > b,
-			number_GREATER_OR_EQUAL_number: (a, b) => a >= b,
-			number_LESS_number: (a, b) => a < b,
-			number_LESS_OR_EQUAL_number: (a, b) => a <= b,
+			number_PLUS_number: (a, b) => a.plus(b),
+			number_MINUS_number: (a, b) => a.minus(b),
+			number_MULTIPLY_number: (a, b) => a.mul(b),
+			number_DIVIDE_number: (a, b) => {
+				if (b.isZero()) {
+					throw new RuntimeError('zero division');
+				}
+				return a.div(b);
+			},
+			number_MODULO_number: (a, b) => {
+				if (b.isZero()) {
+					throw new RuntimeError('zero division');
+				}
+				return a.mod(b);
+			},
+			number_EQUALS_number: (a, b) => a.equals(b),
+			number_NOT_EQUALS_number: (a, b) => !a.equals(b),
+			number_GREATER_number: (a, b) => a.greaterThan(b),
+			number_GREATER_OR_EQUAL_number: (a, b) => a.greaterThanOrEqualTo(b),
+			number_LESS_number: (a, b) => a.lessThan(b),
+			number_LESS_OR_EQUAL_number: (a, b) => a.lessThanOrEqualTo(b),
 			string_PLUS_string: (a, b) => a + b,
 			string_EQUALS_string: (a, b) => a === b,
 			string_NOT_EQUALS_string: (a, b) => a !== b,
 		};
 
 		this.#instructionMap = {
-			push: ({ value }) => this.#stack.push(value),
+			push: ({ value }) => this.#stack.push(typeof value == 'number' ? new Decimal(value) : value),
 			load: ({ memoryKey }) => this.#stack.push(this.#memory.get(memoryKey)!),
 			store: ({ memoryKey }) => this.#memory.set(memoryKey, this.#stack.pop()!),
 			label: () => {},
@@ -109,13 +125,16 @@ export class Interpreter implements InterpretationInfo, Readable<InterpretationI
 			exit: ({ success }) => (this.#exitStatus = success),
 			un_op: ({ operator }) => {
 				const instance = this.#stack.pop()!;
-				const evalOperator = (unaryOperatorMap as any)[`${operator}_${typeof instance}`];
+				const type = instance instanceof Decimal ? 'number' : typeof instance;
+				const evalOperator = (unaryOperatorMap as any)[`${operator}_${type}`];
 				this.#stack.push(evalOperator(instance));
 			},
 			bin_op: ({ operator }) => {
 				const b = this.#stack.pop()!;
 				const a = this.#stack.pop()!;
-				const evalOperator = (binaryOperatorMap as any)[`${typeof a}_${operator}_${typeof b}`];
+				const aType = a instanceof Decimal ? 'number' : typeof a;
+				const bType = b instanceof Decimal ? 'number' : typeof b;
+				const evalOperator = (binaryOperatorMap as any)[`${aType}_${operator}_${bType}`];
 				this.#stack.push(evalOperator(a, b));
 			},
 		};
@@ -141,6 +160,10 @@ export class Interpreter implements InterpretationInfo, Readable<InterpretationI
 		return this.#exitStatus;
 	}
 
+	get error(): RuntimeError | null {
+		return this.#error;
+	}
+
 	get state(): string | null {
 		return this.#state;
 	}
@@ -158,7 +181,18 @@ export class Interpreter implements InterpretationInfo, Readable<InterpretationI
 
 		while (!this.exited && locationEquals(lastLocation, this.#location)) {
 			const instruction = this.#instructions[++this.#currentInstruction];
-			(this.#instructionMap as any)[instruction.type](instruction);
+
+			try {
+				(this.#instructionMap as any)[instruction.type](instruction);
+			}
+			catch (error: unknown) {
+				if (!(error instanceof RuntimeError)) {
+					throw error;
+				}
+
+				this.#error = error;
+				this.#exitStatus = false;
+			}
 		}
 
 		this.#updateSubscribers();
@@ -166,18 +200,13 @@ export class Interpreter implements InterpretationInfo, Readable<InterpretationI
 	}
 
 	reset() {
-		this.#exitStatus = null;
 		this.#currentInstruction = -1;
+		this.#exitStatus = null;
+		this.#error = null;
 		this.#state = null;
 		this.#location = { line: 1, column: 1 };
 		this.#memory = new Map();
 
 		this.#updateSubscribers();
 	}
-}
-
-function locationEquals(a: SourceLocation, b: SourceLocation) {
-	const { line: aLine, column: aColumn } = a;
-	const { line: bLine, column: bColumn } = b;
-	return aLine == bLine && aColumn == bColumn;
 }
