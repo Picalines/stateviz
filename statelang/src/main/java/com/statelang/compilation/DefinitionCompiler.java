@@ -166,7 +166,7 @@ final class DefinitionCompiler {
     private static void compileVariableDefinition(CompilationContext context, VariableDefinition definition) {
         var variableName = definition.variableName();
 
-        checkDuplicateSymbol(context, variableName, definition.variableNameToken().selection());
+        var isDuplicate = checkDuplicateSymbol(context, variableName, definition.variableNameToken().selection());
 
         var programBuilder = context.programBuilder();
 
@@ -176,15 +176,17 @@ final class DefinitionCompiler {
 
         var expressionType = ValueExpressionCompiler.compile(context, definition.initialVariableValue());
 
-        programBuilder
-            .symbol(new VariableSymbol(variableName, expressionType))
-            .instruction(new StoreInstruction(variableName));
+        if (!isDuplicate) {
+            programBuilder.symbol(new VariableSymbol(variableName, expressionType));
+        }
+
+        programBuilder.instruction(new StoreInstruction(variableName));
     }
 
     private static void compileConstantDefinition(CompilationContext context, ConstantDefinition definition) {
         var constantName = definition.constantName();
 
-        checkDuplicateSymbol(context, constantName, definition.constantNameToken().selection());
+        var isDuplicate = checkDuplicateSymbol(context, constantName, definition.constantNameToken().selection());
 
         var programBuilder = context.programBuilder();
 
@@ -194,12 +196,14 @@ final class DefinitionCompiler {
 
         var expressionType = ValueExpressionCompiler.compile(context, definition.initialConstantValue());
 
-        programBuilder
-            .symbol(new ConstantSymbol(constantName, expressionType))
-            .instruction(new StoreInstruction(constantName));
+        if (!isDuplicate) {
+            programBuilder.symbol(new ConstantSymbol(constantName, expressionType));
+        }
+
+        programBuilder.instruction(new StoreInstruction(constantName));
     }
 
-    private static void checkDuplicateSymbol(
+    private static boolean checkDuplicateSymbol(
         CompilationContext context,
         String identifier,
         SourceSelection identifierSelection)
@@ -213,6 +217,9 @@ final class DefinitionCompiler {
                     .selection(identifierSelection)
                     .info(identifier)
             );
+            return true;
         }
+
+        return false;
     }
 }

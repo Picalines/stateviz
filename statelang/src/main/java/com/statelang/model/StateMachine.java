@@ -29,7 +29,7 @@ public final class StateMachine {
     private State initialState;
 
     @Builder
-    private StateMachine(@Singular Set<State> states, String initialStateName, Map<String, Set<String>> transitions) {
+    private StateMachine(Set<State> states, String initialStateName, Map<String, Set<String>> transitions) {
         Preconditions.checkArgument(!states.isEmpty());
 
         this.states = Collections.unmodifiableSet(states);
@@ -56,7 +56,16 @@ public final class StateMachine {
 
         StateMachineBuilder() {
             transitions = new HashMap<>();
-            states = new ArrayList<>();
+            states = new HashSet<>();
+        }
+
+        public StateMachineBuilder state(State state) {
+            states.add(state);
+            return this;
+        }
+
+        public StateMachineBuilder state(String stateName) {
+            return state(new State(stateName, Collections.emptyMap()));
         }
 
         public StateMachineBuilder initialState(String initialState) {
@@ -85,8 +94,8 @@ public final class StateMachine {
                 .findFirst();
         }
 
-        public List<State> definedStates() {
-            return Collections.unmodifiableList(states);
+        public Set<State> definedStates() {
+            return Collections.unmodifiableSet(states);
         }
 
         @SuppressWarnings("unused")
