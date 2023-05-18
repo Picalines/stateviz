@@ -28,7 +28,7 @@
 			"target": [
 				"nsis"
 			],
-			"icon": "./assets/icons/app.ico",
+			"icon": "./assets/icons/icon.ico",
 			"asar": false
 		},
 		"nsis": {
@@ -36,8 +36,8 @@
 			"allowToChangeInstallationDirectory": true,
 			"runAfterFinish": true,
 			"uninstallDisplayName": "Uninstall Stateviz",
-			"installerIcon": "./assets/icons/app.ico",
-			"uninstallerIcon": "./assets/icons/app.ico"
+			"installerIcon": "./assets/icons/icon.ico",
+			"uninstallerIcon": "./assets/icons/icon.ico"
 		}
 	}
 }
