@@ -67,8 +67,8 @@ public final class ValueExpressionParser {
             signedTerm,
             Parse.oneOf(
                 Parse.token(OPERATOR_MULTIPLY).as(BinaryOperator.MULTIPLY),
-                Parse.token(OPERATOR_MULTIPLY).as(BinaryOperator.DIVIDE),
-                Parse.token(OPERATOR_MULTIPLY).as(BinaryOperator.MODULO)
+                Parse.token(OPERATOR_DIVIDE).as(BinaryOperator.DIVIDE),
+                Parse.token(OPERATOR_MODULO).as(BinaryOperator.MODULO)
             ),
             BinaryValueExpressionNode::new
         );
