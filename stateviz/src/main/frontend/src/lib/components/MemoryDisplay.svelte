@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { circOut } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
+	import { Decimal } from 'decimal.js';
 
 	let className = '';
 	export { className as class };
@@ -18,7 +19,7 @@
 		</div>
 		<div>
 			{#each [...memory.values()] as value}
-				<div class="i-{typeof value}">{value}</div>
+				<div class="i-{value instanceof Decimal ? 'number' : typeof value}">{value}</div>
 			{/each}
 		</div>
 	</div>
