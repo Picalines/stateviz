@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import com.statelang.diagnostics.Report;
 import com.statelang.tokenization.Token;
+import static com.statelang.tokenization.Token.Kind.*;
 
 import lombok.AllArgsConstructor;
 
@@ -23,7 +24,7 @@ class ParseTests {
 
         @Test
         void emptySource() {
-            var tokenParser = Parse.token(Token.Kind.KEYWORD_STATE);
+            var tokenParser = Parse.token(KEYWORD_STATE);
 
             var result = assertParsesWithErrors("", tokenParser);
 
@@ -32,23 +33,23 @@ class ParseTests {
 
         @Test
         void singleToken() {
-            var tokenParser = Parse.token(Token.Kind.KEYWORD_STATE);
+            var tokenParser = Parse.token(KEYWORD_STATE);
 
             var parsedToken = assertParsesWithoutErrors("state", tokenParser);
 
-            assertEquals(Token.Kind.KEYWORD_STATE, parsedToken.kind());
+            assertEquals(KEYWORD_STATE, parsedToken.kind());
         }
 
         @Test
         void tooManyTokens() {
-            var tokenParser = Parse.token(Token.Kind.KEYWORD_STATE);
+            var tokenParser = Parse.token(KEYWORD_STATE);
 
             var result = assertParsesWithErrors("state 123", tokenParser);
 
             assertTrue(result.isPresent());
 
             var parsedToken = result.get();
-            assertEquals(Token.Kind.KEYWORD_STATE, parsedToken.kind());
+            assertEquals(KEYWORD_STATE, parsedToken.kind());
         }
     }
 
@@ -72,8 +73,7 @@ class ParseTests {
 
     @Test
     void oneOf() {
-        var tokenKinds = new Token.Kind[] { Token.Kind.KEYWORD_STATE, Token.Kind.KEYWORD_LET,
-            Token.Kind.KEYWORD_CONST };
+        var tokenKinds = new Token.Kind[] { KEYWORD_STATE, KEYWORD_LET, KEYWORD_CONST };
         var tokens = new String[] { "state", "let", "const" };
 
         @SuppressWarnings("unchecked")
@@ -95,8 +95,8 @@ class ParseTests {
     @Test
     void recursive() {
         var parser = Parse.<String>recursive(
-            recursion -> Parse.token(Token.Kind.LITERAL_NUMBER).then(recursion)
-                .or(Parse.token(Token.Kind.DOT).map(() -> "success"))
+            recursion -> Parse.token(LITERAL_NUMBER).then(recursion)
+                .or(Parse.token(DOT).map(() -> "success"))
         );
 
         var result = assertParsesWithoutErrors("1 2 3 .", parser);
@@ -121,10 +121,10 @@ class ParseTests {
             public final Term rightTerm;
         }
 
-        var termParser = Parse.token(Token.Kind.LITERAL_NUMBER)
+        var termParser = Parse.token(LITERAL_NUMBER)
             .map(token -> (Term) new TokenTerm(token));
 
-        var operatorParser = Parse.token(Token.Kind.OPERATOR_PLUS);
+        var operatorParser = Parse.token(OPERATOR_PLUS);
 
         var parser = Parse.chain(termParser, operatorParser, (op, a, b) -> new SumTerm(a, b));
 
@@ -136,11 +136,11 @@ class ParseTests {
     @Test
     void optional() {
         var parser = Parse.optional(
-            Parse.token(Token.Kind.OPERATOR_MINUS).as(-1)
+            Parse.token(OPERATOR_MINUS).as(-1)
         )
             .or(Parse.success(1))
             .then(
-                sign -> Parse.token(Token.Kind.LITERAL_NUMBER)
+                sign -> Parse.token(LITERAL_NUMBER)
                     .map(token -> Double.valueOf(token.text()))
                     .map(num -> sign.value() * num)
             );
@@ -151,7 +151,7 @@ class ParseTests {
 
     @Test
     void skipUntil() {
-        var parser = Parse.skipUntil(Parse.token(Token.Kind.SEMICOLON))
+        var parser = Parse.skipUntil(Parse.token(SEMICOLON))
             .map(() -> "success");
 
         assertEquals("success", assertParsesWithoutErrors("1 2 3 4 5 ;", parser));
