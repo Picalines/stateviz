@@ -92,8 +92,8 @@
 	<i
 		id="reset-btn"
 		class="bi bi-fullscreen-exit"
-		on:click={() => network.fit()}
-		on:keypress={() => network.fit()}
+		on:click={() => network?.fit()}
+		on:keypress={() => network?.fit()}
 	/>
 </div>
 
