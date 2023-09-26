@@ -34,6 +34,13 @@ class ValueExpressionParserTests {
                 .isEqualTo(
                     new NumberLiteralValue(null, 1.25)
                 );
+
+            assertThat(assertParsesWithoutErrors("123", ValueExpressionParser.lambda))
+                .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(Token.class)
+                .isEqualTo(
+                    new NumberLiteralValue(null, 123)
+                );
         }
 
         @Test
@@ -55,12 +62,14 @@ class ValueExpressionParserTests {
 
         @Test
         void stringLiteral() {
-            assertThat(assertParsesWithoutErrors("\"success\"", ValueExpressionParser.lambda))
-                .usingRecursiveComparison()
-                .ignoringFieldsOfTypes(Token.class)
-                .isEqualTo(
-                    new StringLiteralValue(null, "success")
-                );
+            for (var str : new String[] {"", "success"}) {
+                assertThat(assertParsesWithoutErrors("\"" + str + "\"", ValueExpressionParser.lambda))
+                    .usingRecursiveComparison()
+                    .ignoringFieldsOfTypes(Token.class)
+                    .isEqualTo(
+                        new StringLiteralValue(null, str)
+                    );
+            }
         }
     }
 
