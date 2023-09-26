@@ -20,7 +20,7 @@ import lombok.AllArgsConstructor;
 class ParseTests {
 
     @Nested
-    class TryParseTests {
+    class TokenTests {
 
         @Test
         void emptySource() {
